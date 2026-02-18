@@ -28,4 +28,16 @@ This document tracks the five prioritized changes from the ChatGPT critique (see
 
 ---
 
-*Details and notes for each item can be added below as we implement.*
+## Updated final score (follow-up critique)
+
+After implementing the five improvements above, ChatGPT was asked to run a new critique. Below is the updated assessment.
+
+### 🎯 Updated final score
+
+| Category | Score |
+|----------|-------|
+| **Usability** | 8.5 / 10 |
+| **Security** | 7 / 10 |
+| **Prompt engineering** | 8 / 10 |
+
+**⭐ Overall MVP assessment: 8 / 10**
