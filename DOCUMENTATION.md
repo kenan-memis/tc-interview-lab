@@ -136,8 +136,8 @@ We implemented five system prompts, one per technique (Phase D). The user can se
 
 ### 3.4 Security guard(s)
 
-- **What we implemented (Phase F):** One guard — **input length limit**. We cap the user request at **3000 characters** (`MAX_INPUT_LENGTH`). The text area uses `max_chars=3000` and we check length before calling the API. This limits prompt size, token cost, and abuse (e.g. pasting huge text).
-- **How it prevents misuse:** The length cap bounds cost and keeps inputs to a reasonable size.
+- **What we implemented (Phase F):** One guard — **input length limit**. The user request is capped at **3000 characters** (`MAX_INPUT_LENGTH`). The text area uses `max_chars=3000`, so the user cannot enter more than 3000 characters (the widget enforces the limit and shows a character counter). This limits prompt size, token cost, and abuse (e.g. pasting huge text).
+- **How it prevents misuse:** The user cannot enter more than 3000 characters; the limit is enforced by the text area and keeps inputs to a reasonable size.
 
 ---
 
