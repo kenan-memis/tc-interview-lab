@@ -1,5 +1,5 @@
 """
-Interview Lab — Streamlit app (Phase E: + temperature tuning).
+Interview Lab — Streamlit app (Phase F: + security guards).
 Single page: practice type, prompt technique, temperature, user input, call OpenAI, show response.
 """
 
@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
+
+# Security guard (Phase F): input length limit
+MAX_INPUT_LENGTH = 3000
 
 st.set_page_config(page_title="Interview Lab", page_icon="🎯", layout="centered")
 st.title("Interview Lab")
@@ -90,10 +93,11 @@ config = PRACTICE_TYPES[practice_type]
 st.caption(config["tip"])
 
 user_input = st.text_area(
-    "Your request (add details below)",
+    "Your request (add details below, max " + str(MAX_INPUT_LENGTH) + " characters)",
     placeholder=config["placeholder"],
     height=120,
     key="user_request",
+    max_chars=MAX_INPUT_LENGTH,
 )
 
 prompt_technique = st.selectbox(
@@ -115,6 +119,11 @@ temperature = st.slider(
 if st.button("Generate"):
     if not user_input.strip():
         st.warning("Please enter what you'd like to practice.")
+        st.stop()
+
+    # Security: input length limit (Phase F)
+    if len(user_input) > MAX_INPUT_LENGTH:
+        st.error("Your request is too long (max " + str(MAX_INPUT_LENGTH) + " characters). Shorten it and try again.")
         st.stop()
 
     api_key = os.getenv("OPENAI_API_KEY")

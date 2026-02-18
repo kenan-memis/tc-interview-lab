@@ -136,8 +136,8 @@ We implemented five system prompts, one per technique (Phase D). The user can se
 
 ### 3.4 Security guard(s)
 
-- What we implemented.  
-- How it prevents misuse.
+- **What we implemented (Phase F):** One guard — **input length limit**. We cap the user request at **3000 characters** (`MAX_INPUT_LENGTH`). The text area uses `max_chars=3000` and we check length before calling the API. This limits prompt size, token cost, and abuse (e.g. pasting huge text).
+- **How it prevents misuse:** The length cap bounds cost and keeps inputs to a reasonable size.
 
 ---
 
@@ -152,8 +152,8 @@ We implemented five system prompts, one per technique (Phase D). The user can se
 
 ### 4.2 Potential problems with the application
 
-- Limitations (e.g. cost, quality, edge cases).  
-- Risks (e.g. prompt injection, misuse).
+- **Limitations:** Cost scales with use (no per-user caps beyond input length). Quality depends on the model and prompt; the app does not verify facts. Single request/response per run (no chat history). Edge cases: very short or vague requests may get generic answers; long job descriptions may hit the 3000-character limit.
+- **Risks:** **Prompt injection:** We do not yet validate or block override-style input. **Misuse:** Input length limits some abuse; we do not rate-limit or authenticate. API key in `.env` must stay server-side and never be committed.
 
 ### 4.3 Suggestions for improvement
 
