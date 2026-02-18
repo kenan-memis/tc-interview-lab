@@ -1,6 +1,6 @@
 """
-Interview Lab — Streamlit app (Phase C: interview prep focus in UI).
-Single page: practice type dropdown, user input, one system prompt, call OpenAI, show response.
+Interview Lab — Streamlit app (Phase D: five system prompts, technique selector).
+Single page: practice type, prompt technique, user input, call OpenAI, show response.
 """
 
 import os
@@ -13,6 +13,47 @@ load_dotenv()
 st.set_page_config(page_title="Interview Lab", page_icon="🎯", layout="centered")
 st.title("Interview Lab")
 st.caption("Prepare for your next IT interview")
+
+# Five system prompts, different techniques (Phase D)
+SYSTEM_PROMPTS = {
+    "Zero-shot": """You are an IT interview coach. Help the user prepare for job interviews.
+You can help with: behavioural questions (e.g. STAR method), technical questions (e.g. Ruby on Rails, system design), questions to ask the interviewer, and custom prep.
+Give clear, practical answers. Use paragraphs or bullet points as appropriate. No examples are provided; follow the instructions directly.""",
+
+    "Few-shot": """You are an IT interview coach. Help the user prepare for job interviews.
+
+Example exchange 1:
+User: Give me 3 behavioural questions for a senior role.
+Coach: Here are 3 strong behavioural questions: 1) Tell me about a time you had to disagree with a decision. How did you handle it? 2) Describe a situation where you had to meet a tight deadline. 3) Give an example of how you've mentored someone. For each, prepare a STAR-format answer.
+
+Example exchange 2:
+User: What Ruby on Rails questions might I get?
+Coach: You might get: MVC and request lifecycle, ActiveRecord associations and N+1, testing (RSpec), background jobs, and security (strong params, SQL injection). I can drill into any of these.
+
+Now help the user with their request in the same concise, practical style. Use 1–2 short examples in your answer when it helps.""",
+
+    "Chain-of-thought": """You are an IT interview coach. For every response, structure your thinking as follows:
+1. **Analyze:** In one sentence, state what the user needs (e.g. "They need behavioural questions for a senior role").
+2. **Plan:** Briefly note what you will provide (e.g. "I will give 5 questions plus what interviewers look for").
+3. **Respond:** Give the actual questions, advice, or prep content in clear bullets or short paragraphs.
+4. **Tip:** End with one short practical tip (e.g. "Practice out loud and time yourself").
+Be concise but show this reasoning structure so the user sees how to approach similar prep.""",
+
+    "Role (persona)": """You are a senior engineering manager at a product company, with 15 years of experience. You have conducted hundreds of technical and behavioural interviews. You are direct, supportive, and give concrete examples. The user is preparing for an interview; help them as if you were their future interviewer: give realistic questions, what you actually look for in answers, and brief feedback-style tips. Stay in character and practical.""",
+
+    "Structured output": """You are an IT interview coach. For every response, you must use exactly this format:
+
+## Questions (or: What to ask / Topics to cover)
+[Numbered or bullet list]
+
+## What interviewers look for
+[Bullet points: key things they evaluate]
+
+## Sample answers or tips
+[Brief suggestions or one example answer]
+
+Use this structure for every response. Keep each section concise. If the user asks for "questions to ask them", adapt the headings (e.g. "Questions to ask" / "Why they matter" / "Follow-ups").""",
+}
 
 # Practice type options (Phase C)
 PRACTICE_TYPES = {
@@ -38,15 +79,6 @@ PRACTICE_TYPES = {
     },
 }
 
-# One system prompt: IT interview coach (Phase B)
-SYSTEM_PROMPT = """You are an IT interview coach. Help the user prepare for job interviews.
-You can help with:
-- Behavioural questions (e.g. STAR method, past experience, culture fit).
-- Technical questions (e.g. programming, system design, Ruby on Rails, or other technologies).
-- Questions the candidate should ask the interviewer at the end.
-- Custom prep (e.g. tailoring to a role or job description).
-Be concise, practical, and supportive. Answer in clear paragraphs or bullet points as appropriate."""
-
 practice_type = st.selectbox(
     "What do you want to practice?",
     options=list(PRACTICE_TYPES.keys()),
@@ -62,6 +94,13 @@ user_input = st.text_area(
     placeholder=config["placeholder"],
     height=120,
     key="user_request",
+)
+
+prompt_technique = st.selectbox(
+    "Prompt technique (system prompt style)",
+    options=list(SYSTEM_PROMPTS.keys()),
+    index=0,
+    help="Different prompting techniques; try the same request with each to compare.",
 )
 
 if st.button("Generate"):
@@ -83,12 +122,12 @@ if st.button("Generate"):
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system", "content": SYSTEM_PROMPTS[prompt_technique]},
                     {"role": "user", "content": user_message},
                 ],
             )
             reply = response.choices[0].message.content
-            st.success("Here’s your interview prep:")
+            st.success("Here’s your interview prep (using **" + prompt_technique + "**):")
             st.markdown(reply)
         except Exception as e:
             st.error(f"Something went wrong: {e}")

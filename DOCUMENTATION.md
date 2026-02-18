@@ -82,12 +82,15 @@ This keeps the MVP small, clearly "IT interview" focused, and leaves room to imp
 
 ### 2.1 Prompting techniques
 
-- **Zero-shot:** …  
-- **Few-shot:** …  
-- **Chain-of-thought (CoT):** …  
-- **Role / persona:** …  
-- **Structured output:** …  
-- *Which we used in Interview Lab and why.*
+We implemented five system prompts, one per technique (Phase D). The user can select which to use via a dropdown; the same request can be tried with different techniques to compare.
+
+- **Zero-shot:** The model gets only instructions (no examples). We tell it it is an IT interview coach and what to help with; it follows the instructions directly. Good baseline and fast to iterate.
+- **Few-shot:** The system prompt includes 1–2 short example exchanges (user request → coach response). The model mimics style and depth. Often gives more consistent, practical answers for interview prep.
+- **Chain-of-thought (CoT):** We ask the model to structure its response in steps: e.g. (1) Analyze the request, (2) Plan what to provide, (3) Give the content, (4) Add a tip. Makes reasoning visible and can improve clarity.
+- **Role / persona:** The system prompt defines a strong character (e.g. “You are a senior engineering manager who has run hundreds of interviews”). Output tends to feel more realistic and interviewer-like.
+- **Structured output:** We require a fixed format (e.g. “## Questions”, “## What interviewers look for”, “## Sample answers”). Ensures consistent sections and makes it easy to scan.
+
+*Which we used in Interview Lab:* All five, selectable in the UI. *Which worked best:* Try the same request with each; for interview prep, **Few-shot** and **Role (persona)** often give the most usable, concrete answers; **Structured output** is best when you want a consistent layout every time.
 
 ### 2.2 LLM settings and their effect on output
 
@@ -116,8 +119,8 @@ This keeps the MVP small, clearly "IT interview" focused, and leaves room to imp
 
 ### 3.1 How the app works (interview prep with ChatGPT)
 
-- User flow: …  
-- Where the "interview prep" value is (e.g. question types, feedback style).
+- **User flow:** User chooses “What do you want to practice?” (Behavioural / Technical / Questions to ask them / Custom), enters their request in the text area, selects a “Prompt technique” (Zero-shot, Few-shot, Chain-of-thought, Role, Structured output), and clicks Generate. The app sends the chosen system prompt plus the user message to the OpenAI API and displays the model’s reply. The response is shown with the technique name so users can compare runs.
+- **Where the “interview prep” value is:** The system prompts frame the model as an IT interview coach; the practice-type dropdown and user message (including category tag) steer content (behavioural vs technical vs questions to ask, etc.).
 
 ### 3.2 OpenAI API usage
 
@@ -127,9 +130,9 @@ This keeps the MVP small, clearly "IT interview" focused, and leaves room to imp
 
 ### 3.3 Front-end (Streamlit)
 
-- Main components used.  
-- How state is handled (if any).  
-- Where prompts and settings are configured.
+- **Main components used:** `st.selectbox` for practice type and for prompt technique; `st.text_area` for the user request; `st.button` for Generate; `st.spinner` while waiting; `st.success` and `st.markdown` for the reply; `st.caption` for tips; `st.error` / `st.warning` for validation and API errors.
+- **State:** Streamlit reruns on each interaction; no `st.session_state` used for chat history (single request/response per run).
+- **Where prompts and settings are configured:** System prompts are defined in `app.py` in the `SYSTEM_PROMPTS` dict (Phase D); the selected prompt is passed to the API. Model and parameters (e.g. temperature) are set in code; parameter tuning will be exposed in Phase E.
 
 ### 3.4 Security guard(s)
 
