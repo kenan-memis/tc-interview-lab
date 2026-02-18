@@ -83,6 +83,7 @@ Then open the URL shown in the terminal (usually `http://localhost:8501`) in you
 interview-lab/
 ├── README.md           # This file — what the app is, how to run
 ├── DOCUMENTATION.md    # Core concepts, technical implementation, reflection
+├── OPTIONAL_TASKS.md   # Checklist of optional tasks (easy/medium/hard); mark [x] when done
 ├── requirements.txt    # Python dependencies
 ├── .env.example        # Example env vars (no secrets)
 ├── app.py              # Streamlit entry point (or main module)

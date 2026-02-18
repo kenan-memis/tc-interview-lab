@@ -29,11 +29,7 @@ This document supports the Sprint 1 evaluation criteria: core concepts, technica
 
 ### 1.3 Optional tasks (if time; bonus = 2+ medium/hard)
 
-- **Easy (candidates):** difficulty levels, short vs detailed answers, AI personas (strict/neutral/friendly), or critique from ChatGPT.  
-- **Medium (candidates):** all OpenAI settings as UI, JSON output formats, deploy, cost display, job-description field (RAG-style), or second LLM as judge.  
-- **Hard (candidates):** multi-turn chatbot UI, LangChain, or LLM-as-judge evaluation.  
-
-Decide after core app works; document chosen options in Technical Implementation and Reflection.
+A full checklist of all optional tasks (easy, medium, hard) is in **OPTIONAL_TASKS.md**. Mark tasks as done with `[x]` when implemented. For maximum bonus: implement at least 2 medium and 1 hard (or 2 medium + 2 hard — confirm with course materials).
 
 ### 1.4 Phases and timeline (Feb 17 → Mar 2)
 
@@ -78,7 +74,7 @@ This keeps the MVP small, clearly "IT interview" focused, and leaves room to imp
 
 ## 2. Understanding core concepts (study before presentation)
 
-*To be filled during implementation. Use this to explain concepts clearly.*
+Use this section to explain concepts clearly in your presentation.
 
 ### 2.1 Prompting techniques
 
@@ -101,21 +97,21 @@ We implemented five system prompts, one per technique (Phase D). The user can se
 
 ### 2.3 User, system, and assistant roles
 
-- **System:** …  
-- **User:** …  
-- **Assistant:** …  
-- *How we use them in our API calls.*
+- **System:** The system message sets the model’s context and behaviour (e.g. “You are an IT interview coach…”). It is not shown to the user; it defines how the assistant should respond. We send one system message per request with the chosen prompt from `SYSTEM_PROMPTS`.
+- **User:** The user message is what the human (or our app on their behalf) sends. In our app it is the concatenation of practice type and the text from the text area, e.g. `[Behavioural] Give me 5 STAR questions`.
+- **Assistant:** The assistant message is the model’s reply. We do not send assistant messages in our single-turn flow; we only receive the assistant’s content and display it in the UI.
+- *How we use them in our API calls:* We send `messages=[{"role": "system", "content": SYSTEM_PROMPTS[prompt_technique]}, {"role": "user", "content": user_message}]`. The API returns one assistant message; we take `response.choices[0].message.content` and show it as the reply.
 
 ### 2.4 LLM output types
 
-- Plain text vs structured (e.g. JSON).  
-- *What our app uses and why.*
+- **Plain text:** The model returns free-form text (often markdown). Easy to display and read; no parsing. **Structured (e.g. JSON):** The model is instructed to return a specific format (e.g. `{"questions": [...], "tips": [...]}`). Good for downstream code but requires parsing and validation.
+- *What our app uses and why:* We use **plain text** (markdown) from the assistant. We do not request JSON or a fixed schema. The system prompts ask for clear paragraphs or bullet points (and the Structured-output prompt asks for markdown headings), so the reply is readable in the UI without parsing. This keeps the implementation simple and the output flexible for interview prep.
 
 ---
 
 ## 3. Technical implementation
 
-*To be filled during implementation. Describes how the project meets the evaluation criteria.*
+Describes how the project meets the evaluation criteria.
 
 ### 3.1 How the app works (interview prep with ChatGPT)
 
@@ -143,12 +139,12 @@ We implemented five system prompts, one per technique (Phase D). The user can se
 
 ## 4. Reflection and improvement
 
-*To be filled during/after implementation. Use this to justify choices and show awareness of limitations.*
+Use this to justify choices and show awareness of limitations in your presentation.
 
 ### 4.1 Choice of prompt techniques and parameter settings
 
-- Why we chose specific prompting techniques.  
-- Why we chose specific parameter values (e.g. temperature).
+- **Why we chose these prompting techniques:** We implemented five to satisfy the requirement and to cover the main types (zero-shot, few-shot, chain-of-thought, role, structured output). Each gives a different style of reply so the user can compare; Few-shot and Role (persona) tend to work well for interview prep because they produce concrete, consistent answers. We kept all five selectable so the user can experiment.
+- **Why we chose these parameter values:** We expose **temperature** with a slider from 0.0 to 1.0 and default **0.7**. That range is standard for chat; 0.7 balances consistency and variety for Q&A. We did not expose top_p or frequency_penalty to keep the UI simple; they could be added later.
 
 ### 4.2 Potential problems with the application
 
@@ -157,10 +153,10 @@ We implemented five system prompts, one per technique (Phase D). The user can se
 
 ### 4.3 Suggestions for improvement
 
-- Code: …  
-- Prompts: …  
-- Product: …
+- **Code:** Extract system prompts to a separate module or config file for easier editing and testing; add unit tests for validation (e.g. input length, API key presence); add type hints and docstrings; consider logging (e.g. request/response length, errors) for debugging.
+- **Prompts:** Add or tune few-shot examples per practice type (behavioural vs technical); experiment with stricter structured-output formats (e.g. JSON) for one of the techniques; add a “concise vs detailed” instruction that the user can toggle.
+- **Product:** Add chat history (multi-turn) so the user can follow up on the same topic; add a dedicated job-description field and prep tailored to it; deploy to Streamlit Community Cloud (or similar) and add cost estimation per request; add difficulty levels (easy/medium/hard) for questions.
 
 ---
 
-*Last updated: Feb 17, 2025 — Project plan and structure. Content to be completed during implementation.*
+*Last updated: Phase H — Documentation completed.*
