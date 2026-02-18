@@ -22,7 +22,7 @@ Interview Lab helps you prepare for job interviews by:
 - **Main techniques:** System and user prompts, multiple prompting strategies (e.g. zero-shot, few-shot, chain-of-thought), and at least one tuned parameter (e.g. temperature).  
 - **Security:** At least one guard against misuse (e.g. input validation, length limits).  
 
-For evaluation-focused details (prompting techniques, settings, roles, reflection), see **DOCUMENTATION.md**.
+For evaluation-focused details (prompting techniques, settings, roles, reflection), see **docs/DOCUMENTATION.md**.
 
 ---
 
@@ -84,13 +84,17 @@ streamlit run app.py
 
 ---
 
-## Project structure (to be updated)
+## Project structure
 
 ```
 interview-lab/
 ├── README.md           # This file — what the app is, how to run
-├── DOCUMENTATION.md    # Core concepts, technical implementation, reflection
-├── OPTIONAL_TASKS.md   # Checklist of optional tasks (easy/medium/hard); mark [x] when done
+├── docs/               # Documentation (no README here)
+│   ├── DOCUMENTATION.md    # Core concepts, technical implementation, reflection
+│   ├── OPTIONAL_TASKS.md   # Checklist of optional tasks (easy/medium/hard); mark [x] when done
+│   ├── CRITIQUE.md         # ChatGPT critique (usability, security, prompt-engineering)
+│   ├── CRITIQUE_SUGGESTED_TOP_FIVE_IMPROVEMENTS.md
+│   └── ...
 ├── requirements.txt    # Python dependencies
 ├── .env.example        # Example env vars (no secrets)
 ├── app.py              # Streamlit entry point (or main module)

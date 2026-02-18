@@ -29,7 +29,7 @@ This document supports the Sprint 1 evaluation criteria: core concepts, technica
 
 ### 1.3 Optional tasks (if time; bonus = 2+ medium/hard)
 
-A full checklist of all optional tasks (easy, medium, hard) is in **OPTIONAL_TASKS.md**. Mark tasks as done with `[x]` when implemented. For maximum bonus: implement at least 2 medium and 1 hard (or 2 medium + 2 hard — confirm with course materials).
+A full checklist of all optional tasks (easy, medium, hard) is in **OPTIONAL_TASKS.md** (in this `docs/` folder). Mark tasks as done with `[x]` when implemented. For maximum bonus: implement at least 2 medium and 1 hard (or 2 medium + 2 hard — confirm with course materials).
 
 ### 1.4 Phases and timeline (Feb 17 → Mar 2)
 
