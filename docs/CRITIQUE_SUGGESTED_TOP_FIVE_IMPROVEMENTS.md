@@ -20,11 +20,11 @@ This document tracks the five prioritized changes from the ChatGPT critique (see
 
 ## Implementation status
 
-- [ ] **1.** Rename "Prompt technique" → "Response style" + user-friendly option labels
-- [ ] **3.** Move practice type into system prompt (embed category dynamically)
-- [ ] **4.** CoT: internal reasoning only, output final answer
-- [ ] **2.** Hide or simplify temperature (Expert mode or presets)
-- [ ] **5.** Add rate limiting (e.g. per session)
+- [x] **1.** Rename "Prompt technique" → "Response style" + user-friendly option labels
+- [x] **3.** Move practice type into system prompt (embed category dynamically)
+- [x] **4.** CoT: internal reasoning only, output final answer
+- [x] **2.** Hide or simplify temperature (Expert mode or presets)
+- [x] **5.** Add rate limiting (e.g. per session)
 
 ---
 

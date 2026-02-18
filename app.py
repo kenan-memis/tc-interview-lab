@@ -12,12 +12,24 @@ load_dotenv()
 
 # Security guard (Phase F): input length limit
 MAX_INPUT_LENGTH = 3000
+# Rate limiting (Top 5 improvement #5): max requests per session
+MAX_REQUESTS_PER_SESSION = 20
 
 st.set_page_config(page_title="Interview Lab", page_icon="🎯", layout="centered")
 st.title("Interview Lab")
 st.caption("Prepare for your next IT interview")
 
-# Five system prompts, different techniques (Phase D)
+# Response style: user-facing label -> internal key (Top 5 improvement #1)
+RESPONSE_STYLE_OPTIONS = [
+    ("Direct answer", "Zero-shot"),
+    ("With examples", "Few-shot"),
+    ("Step-by-step reasoning", "Chain-of-thought"),
+    ("Senior manager perspective", "Role (persona)"),
+    ("Structured template", "Structured output"),
+]
+RESPONSE_STYLE_DISPLAY_TO_KEY = {display: key for display, key in RESPONSE_STYLE_OPTIONS}
+
+# Five system prompts, different techniques (Phase D); keys = internal names
 SYSTEM_PROMPTS = {
     "Zero-shot": """You are an IT interview coach. Help the user prepare for job interviews.
 You can help with: behavioural questions (e.g. STAR method), technical questions (e.g. Ruby on Rails, system design), questions to ask the interviewer, and custom prep.
@@ -35,12 +47,7 @@ Coach: You might get: MVC and request lifecycle, ActiveRecord associations and N
 
 Now help the user with their request in the same concise, practical style. Use 1–2 short examples in your answer when it helps.""",
 
-    "Chain-of-thought": """You are an IT interview coach. For every response, structure your thinking as follows:
-1. **Analyze:** In one sentence, state what the user needs (e.g. "They need behavioural questions for a senior role").
-2. **Plan:** Briefly note what you will provide (e.g. "I will give 5 questions plus what interviewers look for").
-3. **Respond:** Give the actual questions, advice, or prep content in clear bullets or short paragraphs.
-4. **Tip:** End with one short practical tip (e.g. "Practice out loud and time yourself").
-Be concise but show this reasoning structure so the user sees how to approach similar prep.""",
+    "Chain-of-thought": """You are an IT interview coach. For every response, reason step-by-step internally (analyze what the user needs, plan what to provide, then formulate your answer). Do NOT show your reasoning steps in the output. Only output the final answer in a clean, structured form: give the actual questions, advice, or prep content in clear bullets or short paragraphs, and end with one short practical tip. Be concise.""",
 
     "Role (persona)": """You are a senior engineering manager at a product company, with 15 years of experience. You have conducted hundreds of technical and behavioural interviews. You are direct, supportive, and give concrete examples. The user is preparing for an interview; help them as if you were their future interviewer: give realistic questions, what you actually look for in answers, and brief feedback-style tips. Stay in character and practical.""",
 
@@ -101,26 +108,39 @@ user_input = st.text_area(
     help="Describe what you want to practice; the coach will tailor the response.",
 )
 
-with st.expander("Advanced options (prompt style & temperature)"):
-    prompt_technique = st.selectbox(
-        "Prompt technique (system prompt style)",
-        options=list(SYSTEM_PROMPTS.keys()),
+with st.expander("Advanced options (response style & temperature)"):
+    response_style_display = st.selectbox(
+        "Response style",
+        options=[opt[0] for opt in RESPONSE_STYLE_OPTIONS],
         index=0,
-        help="Different prompting techniques; try the same request with each to compare.",
+        help="How the coach should answer; try the same request with each to compare.",
     )
-    temperature = st.slider(
+    prompt_technique = RESPONSE_STYLE_DISPLAY_TO_KEY[response_style_display]
+    # Temperature presets (Top 5 improvement #2): simpler than raw slider
+    TEMPERATURE_PRESETS = [
+        ("Precise (0.2)", 0.2),
+        ("Balanced (0.7)", 0.7),
+        ("Creative (0.9)", 0.9),
+    ]
+    temp_choice = st.selectbox(
         "Temperature",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.7,
-        step=0.1,
-        help="Lower = more focused and consistent; higher = more varied and creative. 0.5–0.7 is a good range for interview prep.",
+        options=[p[0] for p in TEMPERATURE_PRESETS],
+        index=1,
+        help="Precise = more predictable; Balanced = mix of consistency and variety; Creative = more varied.",
     )
+    temperature = next(v for label, v in TEMPERATURE_PRESETS if label == temp_choice)
 
 st.divider()
 if st.button("Generate"):
     if not user_input.strip():
         st.warning("Please enter what you'd like to practice.")
+        st.stop()
+
+    # Rate limiting (Top 5 improvement #5)
+    if "request_count" not in st.session_state:
+        st.session_state.request_count = 0
+    if st.session_state.request_count >= MAX_REQUESTS_PER_SESSION:
+        st.error(f"Rate limit reached ({MAX_REQUESTS_PER_SESSION} requests per session). Refresh the page to start a new session.")
         st.stop()
 
     # Security: input length limit (Phase F)
@@ -133,8 +153,12 @@ if st.button("Generate"):
         st.error("OpenAI API key is missing. Add OPENAI_API_KEY to your .env file and restart the app.")
         st.stop()
 
-    # Send category + user text so the coach can tailor the response (Phase C)
-    user_message = f"[{practice_type}] {user_input.strip()}"
+    # Embed practice type in system prompt for stronger steering (Top 5 improvement #3)
+    system_content = (
+        f"The user wants **{practice_type}** preparation. Use this to tailor your response.\n\n"
+        + SYSTEM_PROMPTS[prompt_technique]
+    )
+    user_message = user_input.strip()
 
     with st.spinner("Generating..."):
         try:
@@ -142,15 +166,16 @@ if st.button("Generate"):
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": SYSTEM_PROMPTS[prompt_technique]},
+                    {"role": "system", "content": system_content},
                     {"role": "user", "content": user_message},
                 ],
                 temperature=temperature,
             )
             reply = response.choices[0].message.content
+            st.session_state.request_count = st.session_state.get("request_count", 0) + 1
             st.divider()
-            st.success("Here’s your interview prep (using **" + prompt_technique + "**, temperature " + str(temperature) + "):")
+            st.success("Here’s your interview prep (using **" + response_style_display + "**, " + temp_choice + "):")
             st.markdown(reply)
-            st.caption("You can try a different prompt technique or temperature and run again.")
+            st.caption("You can try a different response style or temperature and run again.")
         except Exception as e:
             st.error("Something went wrong. Try again or check your connection.")
