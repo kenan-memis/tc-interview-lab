@@ -122,7 +122,7 @@ Describes how the project meets the evaluation criteria.
 
 - **Client:** We use the `openai` Python package: `OpenAI(api_key=api_key)` and `client.chat.completions.create(...)`.
 - **Parameters sent:** `model="gpt-4o-mini"`; `messages` = list of dicts with `role` and `content` (one system message with the chosen prompt, one user message with the request); `temperature` = value from the UI slider (0.0–1.0, default 0.7).
-- **System vs user:** The system message is the selected entry from `SYSTEM_PROMPTS[prompt_technique]`. The user message is `"[{practice_type}] {user_input}"` so the model knows the category and the exact request.
+- **System vs user:** The system message is built from the selected prompt in `SYSTEM_PROMPTS` plus the practice type (e.g. “The user wants **Behavioural** preparation…”). The user message is only the user’s request text, so the model gets strong category steering from the system prompt.
 
 ### 3.3 Front-end (Streamlit)
 
@@ -157,6 +157,18 @@ Use this to justify choices and show awareness of limitations in your presentati
 - **Prompts:** Add or tune few-shot examples per practice type (behavioural vs technical); experiment with stricter structured-output formats (e.g. JSON) for one of the techniques; add a “concise vs detailed” instruction that the user can toggle.
 - **Product:** Add chat history (multi-turn) so the user can follow up on the same topic; add a dedicated job-description field and prep tailored to it; deploy to Streamlit Community Cloud (or similar) and add cost estimation per request; add difficulty levels (easy/medium/hard) for questions.
 
+### 4.4 Optional easy #2: Improve prompts for IT domain
+
+We improved all five system prompts to be sharper for the **IT domain** (our chosen personal domain):
+
+- **Zero-shot:** Explicit focus on software/tech roles, role level, and tech stack; “no fluff” instruction; bullet-first output.
+- **Few-shot:** Three IT examples (behavioural for senior backend, technical Rails, questions to ask at end); each example is concrete and matches IT; coach style is concise and practical.
+- **Chain-of-thought:** Added IT context (role level, tech stack); output remains final-answer only.
+- **Role (persona):** Stronger persona (FAANG-level, 500+ interviews, values: structured thinking, ownership, clear communication).
+- **Structured output:** “What interviewers look for” clarified for IT (clarity, impact, trade-offs, collaboration); optional “Common mistakes” section; note to tailor to software/tech and role level.
+
+No UI changes; only prompt text in `app.py` was updated.
+
 ---
 
-*Last updated: Phase H — Documentation completed.*
+*Last updated: Phase I — Optional easy #2 (IT prompt improvements) applied.*
