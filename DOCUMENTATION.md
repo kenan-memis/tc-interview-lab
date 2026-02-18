@@ -94,10 +94,10 @@ We implemented five system prompts, one per technique (Phase D). The user can se
 
 ### 2.2 LLM settings and their effect on output
 
-- **Temperature:** …  
-- **Top-p:** …  
-- **Frequency penalty / presence penalty:** …  
-- *What we tuned and how it changed behaviour.*
+- **Temperature:** Controls randomness in the model’s choices. Range typically 0–2. Lower (e.g. 0.2–0.4): more deterministic, repetitive, “safe” wording. Higher (e.g. 0.8–1.0): more varied, creative, sometimes less focused. For Q&A and interview prep, 0.5–0.7 is a common sweet spot.
+- **Top-p (nucleus sampling):** We don’t expose it in the UI yet; the API can use it alongside temperature. It limits choices to the smallest set of tokens whose cumulative probability exceeds p (e.g. 0.9), which can reduce irrelevant or off-topic tokens.
+- **Frequency penalty / presence penalty:** We don’t use them in the app yet. They discourage repetition (frequency) or repeating topics (presence).
+- *What we tuned in Interview Lab:* We expose **temperature** via a slider (0.0–1.0, default 0.7). Lower values give more consistent, textbook-style answers; higher values give more variety in examples and phrasing. The chosen value is shown next to each response so users can relate output to the setting.
 
 ### 2.3 User, system, and assistant roles
 
@@ -124,15 +124,15 @@ We implemented five system prompts, one per technique (Phase D). The user can se
 
 ### 3.2 OpenAI API usage
 
-- Endpoint / client (e.g. `openai` Python package).  
-- Parameters sent: model, messages (system/user/assistant), temperature, etc.  
-- How we pass system vs user prompts.
+- **Client:** We use the `openai` Python package: `OpenAI(api_key=api_key)` and `client.chat.completions.create(...)`.
+- **Parameters sent:** `model="gpt-4o-mini"`; `messages` = list of dicts with `role` and `content` (one system message with the chosen prompt, one user message with the request); `temperature` = value from the UI slider (0.0–1.0, default 0.7).
+- **System vs user:** The system message is the selected entry from `SYSTEM_PROMPTS[prompt_technique]`. The user message is `"[{practice_type}] {user_input}"` so the model knows the category and the exact request.
 
 ### 3.3 Front-end (Streamlit)
 
-- **Main components used:** `st.selectbox` for practice type and for prompt technique; `st.text_area` for the user request; `st.button` for Generate; `st.spinner` while waiting; `st.success` and `st.markdown` for the reply; `st.caption` for tips; `st.error` / `st.warning` for validation and API errors.
+- **Main components used:** `st.selectbox` for practice type and for prompt technique; `st.slider` for temperature (Phase E); `st.text_area` for the user request; `st.button` for Generate; `st.spinner` while waiting; `st.success` and `st.markdown` for the reply; `st.caption` for tips; `st.error` / `st.warning` for validation and API errors.
 - **State:** Streamlit reruns on each interaction; no `st.session_state` used for chat history (single request/response per run).
-- **Where prompts and settings are configured:** System prompts are defined in `app.py` in the `SYSTEM_PROMPTS` dict (Phase D); the selected prompt is passed to the API. Model and parameters (e.g. temperature) are set in code; parameter tuning will be exposed in Phase E.
+- **Where prompts and settings are configured:** System prompts are in `app.py` in the `SYSTEM_PROMPTS` dict (Phase D); the selected prompt is passed to the API. Temperature is set via the slider (Phase E) and passed to the API; model and other parameters are set in code.
 
 ### 3.4 Security guard(s)
 

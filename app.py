@@ -1,6 +1,6 @@
 """
-Interview Lab — Streamlit app (Phase D: five system prompts, technique selector).
-Single page: practice type, prompt technique, user input, call OpenAI, show response.
+Interview Lab — Streamlit app (Phase E: + temperature tuning).
+Single page: practice type, prompt technique, temperature, user input, call OpenAI, show response.
 """
 
 import os
@@ -103,6 +103,15 @@ prompt_technique = st.selectbox(
     help="Different prompting techniques; try the same request with each to compare.",
 )
 
+temperature = st.slider(
+    "Temperature",
+    min_value=0.0,
+    max_value=1.0,
+    value=0.7,
+    step=0.1,
+    help="Lower = more focused and consistent; higher = more varied and creative. 0.5–0.7 is a good range for interview prep.",
+)
+
 if st.button("Generate"):
     if not user_input.strip():
         st.warning("Please enter what you'd like to practice.")
@@ -125,9 +134,10 @@ if st.button("Generate"):
                     {"role": "system", "content": SYSTEM_PROMPTS[prompt_technique]},
                     {"role": "user", "content": user_message},
                 ],
+                temperature=temperature,
             )
             reply = response.choices[0].message.content
-            st.success("Here’s your interview prep (using **" + prompt_technique + "**):")
+            st.success("Here’s your interview prep (using **" + prompt_technique + "**, temperature " + str(temperature) + "):")
             st.markdown(reply)
         except Exception as e:
             st.error(f"Something went wrong: {e}")
