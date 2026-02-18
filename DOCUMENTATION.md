@@ -130,7 +130,7 @@ We implemented five system prompts, one per technique (Phase D). The user can se
 
 ### 3.3 Front-end (Streamlit)
 
-- **Main components used:** `st.selectbox` for practice type and for prompt technique; `st.slider` for temperature (Phase E); `st.text_area` for the user request; `st.button` for Generate; `st.spinner` while waiting; `st.success` and `st.markdown` for the reply; `st.caption` for tips; `st.error` / `st.warning` for validation and API errors.
+- **Main components used:** `st.selectbox` for practice type and for prompt technique; `st.slider` for temperature (Phase E); `st.text_area` for the user request; `st.expander` for advanced options (Phase G); `st.divider` to separate input, action, and output; `st.button` for Generate; `st.spinner` while waiting; `st.success` and `st.markdown` for the reply; `st.caption` for tips and post-response hint; `st.error` / `st.warning` for validation and API errors.
 - **State:** Streamlit reruns on each interaction; no `st.session_state` used for chat history (single request/response per run).
 - **Where prompts and settings are configured:** System prompts are in `app.py` in the `SYSTEM_PROMPTS` dict (Phase D); the selected prompt is passed to the API. Temperature is set via the slider (Phase E) and passed to the API; model and other parameters are set in code.
 

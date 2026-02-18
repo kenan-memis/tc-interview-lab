@@ -1,6 +1,6 @@
 """
-Interview Lab — Streamlit app (Phase F: + security guards).
-Single page: practice type, prompt technique, temperature, user input, call OpenAI, show response.
+Interview Lab — Streamlit app (Phase G: UI polish).
+Single page: practice type, request, advanced options, Generate, response.
 """
 
 import os
@@ -98,24 +98,26 @@ user_input = st.text_area(
     height=120,
     key="user_request",
     max_chars=MAX_INPUT_LENGTH,
+    help="Describe what you want to practice; the coach will tailor the response.",
 )
 
-prompt_technique = st.selectbox(
-    "Prompt technique (system prompt style)",
-    options=list(SYSTEM_PROMPTS.keys()),
-    index=0,
-    help="Different prompting techniques; try the same request with each to compare.",
-)
+with st.expander("Advanced options (prompt style & temperature)"):
+    prompt_technique = st.selectbox(
+        "Prompt technique (system prompt style)",
+        options=list(SYSTEM_PROMPTS.keys()),
+        index=0,
+        help="Different prompting techniques; try the same request with each to compare.",
+    )
+    temperature = st.slider(
+        "Temperature",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.7,
+        step=0.1,
+        help="Lower = more focused and consistent; higher = more varied and creative. 0.5–0.7 is a good range for interview prep.",
+    )
 
-temperature = st.slider(
-    "Temperature",
-    min_value=0.0,
-    max_value=1.0,
-    value=0.7,
-    step=0.1,
-    help="Lower = more focused and consistent; higher = more varied and creative. 0.5–0.7 is a good range for interview prep.",
-)
-
+st.divider()
 if st.button("Generate"):
     if not user_input.strip():
         st.warning("Please enter what you'd like to practice.")
@@ -128,7 +130,7 @@ if st.button("Generate"):
 
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        st.error("OpenAI API key is missing. Add OPENAI_API_KEY to your .env file.")
+        st.error("OpenAI API key is missing. Add OPENAI_API_KEY to your .env file and restart the app.")
         st.stop()
 
     # Send category + user text so the coach can tailor the response (Phase C)
@@ -146,7 +148,9 @@ if st.button("Generate"):
                 temperature=temperature,
             )
             reply = response.choices[0].message.content
+            st.divider()
             st.success("Here’s your interview prep (using **" + prompt_technique + "**, temperature " + str(temperature) + "):")
             st.markdown(reply)
+            st.caption("You can try a different prompt technique or temperature and run again.")
         except Exception as e:
-            st.error(f"Something went wrong: {e}")
+            st.error("Something went wrong. Try again or check your connection.")
