@@ -18,7 +18,7 @@ Interview Lab helps you prepare for job interviews by:
 
 - **Language:** Python  
 - **UI:** Streamlit (single-page app; no separate front-end stack).  
-- **LLM:** OpenAI API (model to be chosen: GPT-4.1, GPT-4.1 mini, GPT-4.1 nano, GPT-4o, or GPT-4o mini).  
+- **LLM:** OpenAI API (we use **GPT-4o mini**).  
 - **Main techniques:** System and user prompts, multiple prompting strategies (e.g. zero-shot, few-shot, chain-of-thought), and at least one tuned parameter (e.g. temperature).  
 - **Security:** At least one guard against misuse (e.g. input validation, length limits).  
 
@@ -28,52 +28,59 @@ For evaluation-focused details (prompting techniques, settings, roles, reflectio
 
 ## How to run it
 
+Anyone who wants to try the app can follow these steps. You need Python, an OpenAI API key, and a terminal.
+
 ### Prerequisites
 
-- Python 3.10+ (recommended).  
-- An [OpenAI API key](https://platform.openai.com/api-keys).
+- **Python 3.10+** (recommended).
+- **OpenAI API key** — create one at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
 
-### Setup
+### 1. Clone the repository
 
-1. **Clone the repository** (once it exists):
+```bash
+git clone https://github.com/YOUR_USERNAME/interview-lab.git
+cd interview-lab
+```
 
-   ```bash
-   git clone <repository-url>
-   cd interview-lab
-   ```
+*(Replace the URL with the actual repo URL if different.)*
 
-2. **Create a virtual environment** (recommended):
+### 2. Create a virtual environment (recommended)
 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate   # On Windows: venv\Scripts\activate
-   ```
+```bash
+python -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
+```
 
-3. **Install dependencies:**
+### 3. Install dependencies
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-4. **Configure the API key:**
+### 4. Configure your OpenAI API key
 
-   - Copy `.env.example` to `.env`.  
-   - Set your OpenAI API key in `.env` (do not commit `.env`).
+- Copy the example env file and add your key:
 
-   ```bash
-   cp .env.example .env
-   # Edit .env and set OPENAI_API_KEY=sk-...
-   ```
+```bash
+cp .env.example .env
+```
 
-### Run the app
+- Open `.env` and set your key (do not commit this file — it is in `.gitignore`):
 
-From the project folder (`interview-lab/`), run:
+```
+OPENAI_API_KEY=sk-your-key-here
+```
+
+### 5. Run the app
+
+From the project root (`interview-lab/`), run:
 
 ```bash
 streamlit run app.py
 ```
 
-Then open the URL shown in the terminal (usually `http://localhost:8501`) in your browser. You should see the title, text area, and **Generate** button; clicking **Generate** shows the response (or placeholder until the API is connected).
+- Open the URL shown in the terminal (usually **http://localhost:8501**) in your browser.
+- You should see the Interview Lab page: choose what to practice, enter your request, optionally open "Advanced options" for prompt technique and temperature, then click **Generate** to get interview prep from the model.
 
 ---
 
