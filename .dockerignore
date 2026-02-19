@@ -1,0 +1,45 @@
+# Environment and secrets — never ship into image
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Git and IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Streamlit local
+.streamlit/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs we don't need at runtime (keep docs/ for any runtime docs if needed)
+# README and deployment doc not needed in container
+README.md
+DEPLOYMENT.md
+115.md
+
+# Test / evaluation (not needed in production image)
+evaluation_criteria.md
+PHASES.md
