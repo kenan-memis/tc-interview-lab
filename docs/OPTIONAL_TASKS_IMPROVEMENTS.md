@@ -121,3 +121,19 @@ That covers the four biggest risks in a public LLM web app.
 **Category:** Medium
 
 **What we implemented:** We added an **Output format** selector in Advanced options with three options: **Plain text** (default, current free-form markdown), **JSON: Questions & tips**, and **JSON: Prep guide**. For the two JSON formats we use OpenAI’s **structured outputs** (`response_format`: `json_schema` with strict mode) so the model returns valid JSON matching the chosen schema. **Format 1 — Questions & tips:** Schema has `questions` (array of `{question`, `topic}`) and `tips` (array of strings). Rendered as numbered questions and bullet tips; **Download as JSON** button saves the raw response. **Format 2 — Prep guide:** Schema has `summary` (string) and `sections` (array of `{title`, `content}`). Rendered as summary paragraph then section headings and content; **Download as JSON** button. When a JSON format is selected we append a short instruction to the system prompt so the model fills the structure; the API enforces the schema. If parsing fails we show a warning and the raw response. Implements "Implement at least two structured JSON output formats for the interview preparation" via two strict JSON schemas, `response_format` in the API call, and formatted display plus download in `app.py`.
+
+---
+
+## Medium #3 — Deploy your app to the Internet (GCP)
+
+**Category:** Medium
+
+**What we implemented:** We prepared deployment to **Google Cloud Run** so the app is available on the Internet. Deliverables: **(1) DEPLOYMENT.md** (in the application root) with full instructions: pre-deployment (prerequisites, local run, optional local Docker build), deployment (GCP project, enable APIs, Artifact Registry, build and push image, Cloud Run deploy with `OPENAI_API_KEY` via Secret Manager or env var), and post-deployment (verification, optional custom domain, cost notes, marking tasks done). **(2) Dockerfile** for a minimal production image (Python 3.11-slim, install deps from requirements.txt, run Streamlit on `PORT` with `--server.address=0.0.0.0`). **(3) .dockerignore** to keep the image small (exclude venv, .env, .git, IDE files, etc.). One deployment to GCP satisfies both Medium #3 (app on the Internet) and Hard #2 (deploy to one of Google Cloud, AWS, or Azure). **Deployment completed.** Live app: [https://interview-lab-482230990341.europe-west10.run.app/](https://interview-lab-482230990341.europe-west10.run.app/).
+
+---
+
+## Hard #2 — Deploy your app to one of: Google Cloud, AWS, or Azure
+
+**Category:** Hard
+
+**What we implemented:** Same as Medium #3: we chose **Google Cloud (GCP)** and prepared a **Cloud Run** deployment. The **DEPLOYMENT.md** guide, **Dockerfile**, and **.dockerignore** are in the application root. **Deployment completed.** Live app: [https://interview-lab-482230990341.europe-west10.run.app/](https://interview-lab-482230990341.europe-west10.run.app/). The app is on the Internet (Medium #3) and on Google Cloud (Hard #2).

@@ -84,11 +84,21 @@ streamlit run app.py
 
 ---
 
+## Deployment
+
+**Live app (production):** [https://interview-lab-482230990341.europe-west10.run.app/](https://interview-lab-482230990341.europe-west10.run.app/)
+
+To deploy the app to **Google Cloud Run** (and satisfy the course optional tasks for “deploy to the Internet” and “deploy to GCP”), see **[DEPLOYMENT.md](DEPLOYMENT.md)**. It covers pre-deployment checks, building the Docker image, pushing to Artifact Registry, deploying to Cloud Run, and setting the `OPENAI_API_KEY` secret. The repo includes a **Dockerfile** and **.dockerignore** for a minimal production image.
+
+---
+
 ## Project structure
 
 ```
 interview-lab/
 ├── README.md           # This file — what the app is, how to run
+├── DEPLOYMENT.md       # Deployment to Google Cloud Run (pre-, deploy, post-steps)
+├── Dockerfile          # Production image for Cloud Run
 ├── docs/               # Documentation (no README here)
 │   ├── DOCUMENTATION.md    # Core concepts, technical implementation, reflection
 │   ├── OPTIONAL_TASKS.md   # Checklist of optional tasks (easy/medium/hard); mark [x] when done

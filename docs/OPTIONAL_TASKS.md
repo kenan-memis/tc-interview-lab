@@ -21,7 +21,7 @@ Checklist of all optional tasks (easy, medium, hard). Mark with `[x]` when imple
 
 - [x] **1.** Add all OpenAI settings (model, temperature, frequency, etc.) for the user to tune as sliders/fields.
 - [x] **2.** Implement at least two structured JSON output formats for the interview preparation.
-- [ ] **3.** Deploy your app to the Internet.
+- [x] **3.** Deploy your app to the Internet.
 - [ ] **4.** Calculate and provide output to the user on the price of the prompt.
 - [ ] **5.** Read OpenAI API documentation, think of your own improvement, and implement it.
 - [ ] **6.** Use Gemini, Claude or another LLM as LLM 2 to validate the output of the main LLM (LLM as a judge).
@@ -35,7 +35,7 @@ Checklist of all optional tasks (easy, medium, hard). Mark with `[x]` when imple
 ## Hard
 
 - [ ] **1.** Implement a full-fledged chatbot (multi-turn) instead of a one-time call — Streamlit or React.
-- [ ] **2.** Deploy your app to one of: Google Cloud (Gemini), AWS, or Azure.
+- [x] **2.** Deploy your app to one of: Google Cloud (Gemini), AWS, or Azure.
 - [ ] **3.** Use LangChain (chains or agents) to implement the app.
 - [ ] **4.** Add a vector database to check if interview preparation data was seen before; prompt LLM to generate new content when needed.
 - [ ] **5.** Use open-source LLMs (not Gemini, OpenAI, etc.) for the project.
