@@ -173,6 +173,10 @@ We improved all five system prompts to be sharper for the **IT domain** (our cho
 
 No UI changes; only prompt text in `app.py` was updated.
 
+### 4.5 Optional easy #4: Simulate different difficulty levels
+
+We added a **Difficulty** selector (Easy, Medium, Hard, Expert) so users can adjust the complexity of interview questions. The chosen difficulty is injected into the system prompt (e.g. "The user wants **Behavioural** preparation at **Medium** difficulty. Adjust the complexity of questions and expectations accordingly…") with brief guidance: Easy = foundational/junior, Medium = mid-level, Hard = senior/advanced, Expert = FAANG-level or very tough. The success message shows the selected difficulty alongside response style and temperature. Implemented via one new selectbox and one extended system-prompt prefix in `app.py`.
+
 ---
 
-*Last updated: Phase I — Optional easy #2 (IT prompt improvements) applied.*
+*Last updated: Phase I — Optional easy #4 (difficulty levels) applied.*

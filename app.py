@@ -113,11 +113,21 @@ PRACTICE_TYPES = {
     },
 }
 
+# Optional easy #4: difficulty levels — adjust complexity of interview questions
+DIFFICULTY_OPTIONS = ("Easy", "Medium", "Hard", "Expert")
+
 practice_type = st.selectbox(
     "What do you want to practice?",
     options=list(PRACTICE_TYPES.keys()),
     index=0,
     help="Choose the kind of interview prep you need.",
+)
+
+difficulty = st.selectbox(
+    "Difficulty",
+    options=DIFFICULTY_OPTIONS,
+    index=1,
+    help="Easy = foundational/junior; Medium = mid-level; Hard = senior/advanced; Expert = FAANG-level or very tough.",
 )
 
 config = PRACTICE_TYPES[practice_type]
@@ -183,9 +193,10 @@ if st.button("Generate"):
         st.error("OpenAI API key is missing. Add OPENAI_API_KEY to your .env file and restart the app.")
         st.stop()
 
-    # Embed practice type in system prompt for stronger steering (Top 5 improvement #3)
+    # Embed practice type and difficulty in system prompt (Top 5 #3 + optional easy #4)
     system_content = (
-        f"The user wants **{practice_type}** preparation. Use this to tailor your response.\n\n"
+        f"The user wants **{practice_type}** preparation at **{difficulty}** difficulty. "
+        f"Adjust the complexity of questions and expectations accordingly (Easy = foundational/junior, Medium = mid-level, Hard = senior/advanced, Expert = FAANG-level or very tough). Use this to tailor your response.\n\n"
         + SYSTEM_PROMPTS[prompt_technique]
         + SYSTEM_PROMPT_REFUSAL
     )
@@ -205,7 +216,7 @@ if st.button("Generate"):
             reply = response.choices[0].message.content
             st.session_state.request_count = st.session_state.get("request_count", 0) + 1
             st.divider()
-            st.success("Here’s your interview prep (using **" + response_style_display + "**, " + temp_choice + "):")
+            st.success("Here’s your interview prep (" + difficulty + ", **" + response_style_display + "**, " + temp_choice + "):")
             st.markdown(reply)
             st.caption("You can try a different response style or temperature and run again.")
         except Exception as e:

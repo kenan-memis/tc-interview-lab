@@ -63,3 +63,11 @@ That covers the four biggest risks in a public LLM web app.
 **New overall: 8.5 / 10**
 
 **What changed strategically:** The app is not just functional, not just prompt-correct, but **security-aware**. That puts you above most student-level LLM projects.
+
+---
+
+## Easy #4 — Simulate different difficulty levels
+
+**Category:** Easy
+
+**What we implemented:** We added a **Difficulty** selector (Easy, Medium, Hard, Expert) so users can adjust the complexity of interview questions. The chosen difficulty is injected into the system prompt so the model tailors question depth and expectations (e.g. Easy = foundational/junior, Medium = mid-level, Hard = senior/advanced, Expert = FAANG-level or very tough). The success message shows the selected difficulty alongside response style and temperature. One new selectbox and an extended system-prompt prefix in `app.py`; no new API parameters.
