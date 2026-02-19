@@ -115,6 +115,13 @@ PRACTICE_TYPES = {
 DIFFICULTY_OPTIONS = ("Easy", "Medium", "Hard", "Expert")
 # Optional easy #5: concise vs detailed — prompt the model for short or in-depth answers
 ANSWER_LENGTH_OPTIONS = ("Concise", "Detailed")
+# Optional easy #7: mock interview AI personas — strict / neutral / friendly
+INTERVIEWER_PERSONA_OPTIONS = ("Strict", "Neutral", "Friendly")
+PERSONA_PROMPT = {
+    "Strict": "You are role-playing a **strict** interviewer: high bar, minimal encouragement, tough follow-ups, and direct critical feedback. Do not sugar-coat; simulate an interviewer who pushes hard.",
+    "Neutral": "You are role-playing a **neutral**, professional interviewer: balanced tone, factual follow-ups, and clear but not harsh feedback.",
+    "Friendly": "You are role-playing a **friendly**, supportive interviewer: warm tone, encouraging, give hints when useful, and constructive feedback.",
+}
 
 # Two content columns with a gap between them; left column includes title for top alignment
 col_main, col_gap, col_guidelines = st.columns([1, 0.12, 1])
@@ -141,6 +148,13 @@ with col_main:
         options=ANSWER_LENGTH_OPTIONS,
         index=0,
         help="Concise = short bullets and 1–2 sentences per point; Detailed = fuller explanations and examples.",
+    )
+
+    interviewer_persona = st.selectbox(
+        "Interviewer persona",
+        options=INTERVIEWER_PERSONA_OPTIONS,
+        index=1,
+        help="Strict = tough, high bar; Neutral = professional, balanced; Friendly = warm, encouraging.",
     )
 
     config = PRACTICE_TYPES[practice_type]
@@ -206,16 +220,18 @@ with col_main:
             st.error("OpenAI API key is missing. Add OPENAI_API_KEY to your .env file and restart the app.")
             st.stop()
 
-        # Embed practice type, difficulty, and answer length in system prompt (Top 5 #3 + easy #4 + easy #5)
+        # Embed practice type, difficulty, answer length, and interviewer persona (Top 5 #3 + easy #4 + easy #5 + easy #7)
         length_instruction = (
         "The user wants **concise** answers: keep responses short, bullet points and 1–2 sentences per point. No long paragraphs."
         if answer_length == "Concise"
         else "The user wants **detailed** answers: include explanations, examples, and fuller context where helpful."
         )
+        persona_instruction = PERSONA_PROMPT[interviewer_persona]
         system_content = (
             f"The user wants **{practice_type}** preparation at **{difficulty}** difficulty. "
             f"Adjust the complexity of questions and expectations accordingly (Easy = foundational/junior, Medium = mid-level, Hard = senior/advanced, Expert = FAANG-level or very tough). "
-            f"{length_instruction} Use this to tailor your response.\n\n"
+            f"{length_instruction} "
+            f"Interviewer style: {persona_instruction} Use this to tailor your response.\n\n"
             + SYSTEM_PROMPTS[prompt_technique]
             + SYSTEM_PROMPT_REFUSAL
         )
@@ -235,7 +251,7 @@ with col_main:
                 reply = response.choices[0].message.content
                 st.session_state.request_count = st.session_state.get("request_count", 0) + 1
                 st.divider()
-                st.success("Here’s your interview prep (" + answer_length + ", " + difficulty + ", **" + response_style_display + "**, " + temp_choice + "):")
+                st.success("Here’s your interview prep (" + answer_length + ", " + difficulty + ", **" + interviewer_persona + "** persona, **" + response_style_display + "**, " + temp_choice + "):")
                 st.markdown(reply)
                 st.caption("You can try a different response style or temperature and run again.")
             except Exception as e:

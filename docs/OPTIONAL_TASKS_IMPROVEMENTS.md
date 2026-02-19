@@ -95,3 +95,11 @@ That covers the four biggest risks in a public LLM web app.
 **Category:** Easy
 
 **What we implemented:** An in-app section **"For interviewers: generate evaluation guidelines"** (expander below the main prep flow). It uses the **current** Difficulty and Practice type from the page. When the user clicks **"Generate interviewer guidelines"**, the app calls the same API with a dedicated prompt that asks the model to create structured evaluation criteria for that practice type and difficulty (e.g. what to assess, how to score, strong vs weak indicators, red flags). The result is shown in the UI. Changing difficulty or practice type and clicking again produces different guidelines. Rate limiting applies (one request per click). Implements "ask ChatGPT to create structured evaluation criteria for technical and behavioural interviews" by using the in-app model with difficulty/seniority-aware prompts so results stay in sync with the parameters the user selected.
+
+---
+
+## Easy #7 — Simulate a mock interview with AI personas
+
+**Category:** Easy
+
+**What we implemented:** We added an **Interviewer persona** selector (Strict, Neutral, Friendly) so the AI role-plays that interviewer style when generating questions and feedback. **Strict:** high bar, minimal encouragement, tough follow-ups, direct critical feedback. **Neutral:** balanced, professional tone, factual follow-ups, clear but not harsh feedback. **Friendly:** warm, encouraging, hints when useful, constructive feedback. The chosen persona is injected into the system prompt for every main "Generate" request; the success message shows the selected persona. Single-shot flow unchanged; no multi-turn chat. Implements "Simulate a mock interview with AI personas — role-play as a strict, neutral, or friendly interviewer" via one selectbox and persona-specific prompt snippets in `app.py`.
