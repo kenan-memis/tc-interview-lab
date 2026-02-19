@@ -121,6 +121,13 @@ OPENAI_MODELS = [
 ]
 OPENAI_MODEL_DISPLAY_TO_ID = {display: id_ for display, id_ in OPENAI_MODELS}
 
+# Creativity level: stepped control for temperature (feedback: reduce slider fatigue)
+CREATIVITY_OPTIONS = [
+    ("Precise", 0.2),
+    ("Balanced", 0.7),
+    ("Creative", 0.9),
+]
+
 # Optional easy #4: difficulty levels — adjust complexity of interview questions
 DIFFICULTY_OPTIONS = ("Easy", "Medium", "Hard", "Expert")
 # Optional easy #5: concise vs detailed — prompt the model for short or in-depth answers
@@ -180,15 +187,7 @@ with col_main:
     )
 
     with st.expander("Advanced options (response style & API settings)"):
-        response_style_display = st.selectbox(
-            "Response style",
-            options=[opt[0] for opt in RESPONSE_STYLE_OPTIONS],
-            index=0,
-            help="How the coach should answer; try the same request with each to compare.",
-        )
-        prompt_technique = RESPONSE_STYLE_DISPLAY_TO_KEY[response_style_display]
-
-        # Medium #1: all OpenAI settings with user-friendly labels
+        # Primary controls: model, response style, creativity (feedback: stepped control, less slider fatigue)
         model_display = st.selectbox(
             "AI model (model)",
             options=[m[0] for m in OPENAI_MODELS],
@@ -197,46 +196,57 @@ with col_main:
         )
         model_id = OPENAI_MODEL_DISPLAY_TO_ID[model_display]
 
-        temperature = st.slider(
-            "Response variety (temperature)",
-            min_value=0.0,
-            max_value=2.0,
-            value=0.7,
-            step=0.1,
-            help="Low = more consistent answers; high = more varied and creative.",
+        response_style_display = st.selectbox(
+            "Response style",
+            options=[opt[0] for opt in RESPONSE_STYLE_OPTIONS],
+            index=0,
+            help="How the coach should answer; try the same request with each to compare.",
         )
-        top_p = st.slider(
-            "Focus on likely words (top_p)",
-            min_value=0.0,
-            max_value=1.0,
-            value=1.0,
-            step=0.05,
-            help="Lower = more focused wording; higher = broader word choice. Usually leave at 1 or adjust Response variety instead.",
+        prompt_technique = RESPONSE_STYLE_DISPLAY_TO_KEY[response_style_display]
+
+        creativity_display = st.radio(
+            "Creativity level (temperature)",
+            options=[c[0] for c in CREATIVITY_OPTIONS],
+            index=1,  # Balanced
+            help="Precise = consistent answers; Balanced = mix; Creative = more varied.",
+            horizontal=True,
         )
-        frequency_penalty = st.slider(
-            "Reduce repetition (frequency_penalty)",
-            min_value=-2.0,
-            max_value=2.0,
-            value=0.0,
-            step=0.1,
-            help="Higher = avoid repeating the same phrases in the answer.",
-        )
-        presence_penalty = st.slider(
-            "Encourage new topics (presence_penalty)",
-            min_value=-2.0,
-            max_value=2.0,
-            value=0.0,
-            step=0.1,
-            help="Higher = more likely to bring up new themes in the answer.",
-        )
-        max_tokens_ui = st.number_input(
-            "Max response length (max_tokens, optional)",
-            min_value=0,
-            max_value=4096,
-            value=0,
-            step=100,
-            help="0 = no limit (use AI default). Set 100–4096 to cap how long the answer can be.",
-        )
+        temperature = next(v for label, v in CREATIVITY_OPTIONS if label == creativity_display)
+
+        # Technical parameters: hidden by default (feedback: categorize & hide)
+        with st.expander("More advanced options (top_p, penalties, etc.)"):
+            top_p = st.slider(
+                "Focus on likely words (top_p)",
+                min_value=0.0,
+                max_value=1.0,
+                value=1.0,
+                step=0.05,
+                help="Lower = more focused wording; higher = broader word choice. Usually leave at 1.",
+            )
+            frequency_penalty = st.slider(
+                "Reduce repetition (frequency_penalty)",
+                min_value=-2.0,
+                max_value=2.0,
+                value=0.0,
+                step=0.1,
+                help="Higher = avoid repeating the same phrases in the answer.",
+            )
+            presence_penalty = st.slider(
+                "Encourage new topics (presence_penalty)",
+                min_value=-2.0,
+                max_value=2.0,
+                value=0.0,
+                step=0.1,
+                help="Higher = more likely to bring up new themes in the answer.",
+            )
+            max_tokens_ui = st.number_input(
+                "Max response length (max_tokens, optional)",
+                min_value=0,
+                max_value=4096,
+                value=0,
+                step=100,
+                help="0 = no limit (use AI default). Set 100–4096 to cap how long the answer can be.",
+            )
 
     st.divider()
     if st.button("Generate"):
@@ -306,7 +316,7 @@ with col_main:
                 reply = response.choices[0].message.content
                 st.session_state.request_count = st.session_state.get("request_count", 0) + 1
                 st.divider()
-                st.success("Here’s your interview prep (" + answer_length + ", " + difficulty + ", **" + interviewer_persona + "** persona, **" + model_display + "**, **" + response_style_display + "**, response variety " + str(temperature) + "):")
+                st.success("Here’s your interview prep (" + answer_length + ", " + difficulty + ", **" + interviewer_persona + "** persona, **" + model_display + "**, **" + response_style_display + "**, Creativity: **" + creativity_display + "**):")
                 st.markdown(reply)
                 st.caption("You can try a different response style or temperature and run again.")
             except Exception as e:
