@@ -111,6 +111,16 @@ PRACTICE_TYPES = {
     },
 }
 
+# Medium #1: models from project requirements (115.md) — display name -> API model id
+OPENAI_MODELS = [
+    ("GPT-4.1", "gpt-4.1"),
+    ("GPT-4.1 mini", "gpt-4.1-mini"),
+    ("GPT-4.1 nano", "gpt-4.1-nano"),
+    ("GPT-4o", "gpt-4o"),
+    ("GPT-4o mini", "gpt-4o-mini"),
+]
+OPENAI_MODEL_DISPLAY_TO_ID = {display: id_ for display, id_ in OPENAI_MODELS}
+
 # Optional easy #4: difficulty levels — adjust complexity of interview questions
 DIFFICULTY_OPTIONS = ("Easy", "Medium", "Hard", "Expert")
 # Optional easy #5: concise vs detailed — prompt the model for short or in-depth answers
@@ -169,7 +179,7 @@ with col_main:
         help="Describe what you want to practice; the coach will tailor the response.",
     )
 
-    with st.expander("Advanced options (response style & temperature)"):
+    with st.expander("Advanced options (response style & API settings)"):
         response_style_display = st.selectbox(
             "Response style",
             options=[opt[0] for opt in RESPONSE_STYLE_OPTIONS],
@@ -177,19 +187,56 @@ with col_main:
             help="How the coach should answer; try the same request with each to compare.",
         )
         prompt_technique = RESPONSE_STYLE_DISPLAY_TO_KEY[response_style_display]
-        # Temperature presets (Top 5 improvement #2): simpler than raw slider
-        TEMPERATURE_PRESETS = [
-            ("Precise (0.2)", 0.2),
-            ("Balanced (0.7)", 0.7),
-            ("Creative (0.9)", 0.9),
-        ]
-        temp_choice = st.selectbox(
-            "Temperature",
-            options=[p[0] for p in TEMPERATURE_PRESETS],
-            index=1,
-            help="Precise = more predictable; Balanced = mix of consistency and variety; Creative = more varied.",
+
+        # Medium #1: all OpenAI settings with user-friendly labels
+        model_display = st.selectbox(
+            "AI model (model)",
+            options=[m[0] for m in OPENAI_MODELS],
+            index=4,  # GPT-4o mini
+            help="Which AI writes the answers. Lighter models are faster; larger ones can be more capable.",
         )
-        temperature = next(v for label, v in TEMPERATURE_PRESETS if label == temp_choice)
+        model_id = OPENAI_MODEL_DISPLAY_TO_ID[model_display]
+
+        temperature = st.slider(
+            "Response variety (temperature)",
+            min_value=0.0,
+            max_value=2.0,
+            value=0.7,
+            step=0.1,
+            help="Low = more consistent answers; high = more varied and creative.",
+        )
+        top_p = st.slider(
+            "Focus on likely words (top_p)",
+            min_value=0.0,
+            max_value=1.0,
+            value=1.0,
+            step=0.05,
+            help="Lower = more focused wording; higher = broader word choice. Usually leave at 1 or adjust Response variety instead.",
+        )
+        frequency_penalty = st.slider(
+            "Reduce repetition (frequency_penalty)",
+            min_value=-2.0,
+            max_value=2.0,
+            value=0.0,
+            step=0.1,
+            help="Higher = avoid repeating the same phrases in the answer.",
+        )
+        presence_penalty = st.slider(
+            "Encourage new topics (presence_penalty)",
+            min_value=-2.0,
+            max_value=2.0,
+            value=0.0,
+            step=0.1,
+            help="Higher = more likely to bring up new themes in the answer.",
+        )
+        max_tokens_ui = st.number_input(
+            "Max response length (max_tokens, optional)",
+            min_value=0,
+            max_value=4096,
+            value=0,
+            step=100,
+            help="0 = no limit (use AI default). Set 100–4096 to cap how long the answer can be.",
+        )
 
     st.divider()
     if st.button("Generate"):
@@ -237,21 +284,29 @@ with col_main:
         )
         user_message = user_input.strip()
 
+        # Medium #1: build API kwargs from UI settings
+        api_kwargs = {
+            "model": model_id,
+            "messages": [
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": user_message},
+            ],
+            "temperature": temperature,
+            "top_p": top_p,
+            "frequency_penalty": frequency_penalty,
+            "presence_penalty": presence_penalty,
+        }
+        if max_tokens_ui > 0:
+            api_kwargs["max_tokens"] = max_tokens_ui
+
         with st.spinner("Generating..."):
             try:
                 client = OpenAI(api_key=api_key)
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": system_content},
-                        {"role": "user", "content": user_message},
-                    ],
-                    temperature=temperature,
-                )
+                response = client.chat.completions.create(**api_kwargs)
                 reply = response.choices[0].message.content
                 st.session_state.request_count = st.session_state.get("request_count", 0) + 1
                 st.divider()
-                st.success("Here’s your interview prep (" + answer_length + ", " + difficulty + ", **" + interviewer_persona + "** persona, **" + response_style_display + "**, " + temp_choice + "):")
+                st.success("Here’s your interview prep (" + answer_length + ", " + difficulty + ", **" + interviewer_persona + "** persona, **" + model_display + "**, **" + response_style_display + "**, response variety " + str(temperature) + "):")
                 st.markdown(reply)
                 st.caption("You can try a different response style or temperature and run again.")
             except Exception as e:
@@ -291,14 +346,20 @@ with col_guidelines:
                     with st.spinner("Generating guidelines..."):
                         try:
                             client = OpenAI(api_key=api_key)
-                            response = client.chat.completions.create(
-                                model="gpt-4o-mini",
-                                messages=[
+                            guidelines_kwargs = {
+                                "model": model_id,
+                                "messages": [
                                     {"role": "system", "content": guidelines_system},
                                     {"role": "user", "content": guidelines_user},
                                 ],
-                                temperature=0.5,
-                            )
+                                "temperature": temperature,
+                                "top_p": top_p,
+                                "frequency_penalty": frequency_penalty,
+                                "presence_penalty": presence_penalty,
+                            }
+                            if max_tokens_ui > 0:
+                                guidelines_kwargs["max_tokens"] = max_tokens_ui
+                            response = client.chat.completions.create(**guidelines_kwargs)
                             guidelines_text = response.choices[0].message.content
                             st.session_state.request_count = st.session_state.get("request_count", 0) + 1
                             st.success("Interviewer guidelines generated.")
