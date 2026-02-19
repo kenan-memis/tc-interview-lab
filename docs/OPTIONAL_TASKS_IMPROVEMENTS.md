@@ -2,7 +2,15 @@
 
 This document records what we implemented for each optional task and the results from ChatGPT re-evaluation where applicable.
 
-**Optional easy task #1** (Ask ChatGPT to critique your solution) is fully covered in the CRITIQUE documents: see `CRITIQUE.md` for the critique text and `CRITIQUE_SUGGESTED_TOP_FIVE_IMPROVEMENTS.md` for the top five improvements and updated scores. **Optional easy task #2** (Improve prompts for IT domain) is described in `DOCUMENTATION.md` §4.4. Below we document from **optional easy task #3** onward, including ChatGPT re-evaluation results where available.
+**Optional easy task #1** (Ask ChatGPT to critique your solution) is fully covered in the CRITIQUE documents: see `CRITIQUE.md` for the critique text and `CRITIQUE_SUGGESTED_TOP_FIVE_IMPROVEMENTS.md` for the top five improvements and updated scores. All other optional task **implementation details** (what we built, how it works) are recorded below in this file. ChatGPT re-evaluation results are included where available.
+
+---
+
+## Easy #2 — Improve prompts for IT domain
+
+**Category:** Easy
+
+**What we implemented:** We improved all five system prompts to be sharper for the **IT domain** (our chosen personal domain). Zero-shot: explicit focus on software/tech roles, role level, and tech stack; "no fluff" instruction; bullet-first output. Few-shot: three IT examples (behavioural for senior backend, technical Rails, questions to ask at end); each example is concrete and matches IT; coach style is concise and practical. Chain-of-thought: added IT context (role level, tech stack); output remains final-answer only. Role (persona): stronger persona (FAANG-level, 500+ interviews, values: structured thinking, ownership, clear communication). Structured output: "What interviewers look for" clarified for IT (clarity, impact, trade-offs, collaboration); optional "Common mistakes" section; note to tailor to software/tech and role level. No UI changes; only prompt text in `app.py` was updated.
 
 ---
 
