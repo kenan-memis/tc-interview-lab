@@ -20,7 +20,7 @@ Checklist of all optional tasks (easy, medium, hard). Mark with `[x]` when imple
 ## Medium
 
 - [x] **1.** Add all OpenAI settings (model, temperature, frequency, etc.) for the user to tune as sliders/fields.
-- [ ] **2.** Implement at least two structured JSON output formats for the interview preparation.
+- [x] **2.** Implement at least two structured JSON output formats for the interview preparation.
 - [ ] **3.** Deploy your app to the Internet.
 - [ ] **4.** Calculate and provide output to the user on the price of the prompt.
 - [ ] **5.** Read OpenAI API documentation, think of your own improvement, and implement it.

@@ -3,6 +3,7 @@ Interview Lab — Streamlit app (Phase G: UI polish).
 Single page: practice type, request, advanced options, Generate, response.
 """
 
+import json
 import os
 import streamlit as st
 from dotenv import load_dotenv
@@ -128,6 +129,65 @@ CREATIVITY_OPTIONS = [
     ("Creative", 0.9),
 ]
 
+# Medium #2: structured JSON output formats — internal key -> (display name, response_format for API)
+OUTPUT_FORMAT_PLAIN = "Plain text"
+OUTPUT_FORMAT_QUESTIONS_TIPS = "JSON: Questions & tips"
+OUTPUT_FORMAT_PREP_GUIDE = "JSON: Prep guide"
+OUTPUT_FORMAT_OPTIONS = (OUTPUT_FORMAT_PLAIN, OUTPUT_FORMAT_QUESTIONS_TIPS, OUTPUT_FORMAT_PREP_GUIDE)
+
+# JSON schemas for OpenAI structured outputs (strict mode)
+JSON_SCHEMA_QUESTIONS_TIPS = {
+    "name": "interview_questions_and_tips",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "questions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "question": {"type": "string"},
+                        "topic": {"type": "string"},
+                    },
+                    "required": ["question", "topic"],
+                    "additionalProperties": False,
+                },
+            },
+            "tips": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+        },
+        "required": ["questions", "tips"],
+        "additionalProperties": False,
+    },
+}
+JSON_SCHEMA_PREP_GUIDE = {
+    "name": "interview_prep_guide",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "summary": {"type": "string"},
+            "sections": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"},
+                        "content": {"type": "string"},
+                    },
+                    "required": ["title", "content"],
+                    "additionalProperties": False,
+                },
+            },
+        },
+        "required": ["summary", "sections"],
+        "additionalProperties": False,
+    },
+}
+
 # Optional easy #4: difficulty levels — adjust complexity of interview questions
 DIFFICULTY_OPTIONS = ("Easy", "Medium", "Hard", "Expert")
 # Optional easy #5: concise vs detailed — prompt the model for short or in-depth answers
@@ -213,6 +273,14 @@ with col_main:
         )
         temperature = next(v for label, v in CREATIVITY_OPTIONS if label == creativity_display)
 
+        # Medium #2: structured JSON output formats
+        output_format = st.selectbox(
+            "Output format",
+            options=OUTPUT_FORMAT_OPTIONS,
+            index=0,
+            help="Plain text = free-form answer. JSON formats return structured data (questions & tips, or prep guide with summary and sections).",
+        )
+
         # Technical parameters: hidden by default (feedback: categorize & hide)
         with st.expander("More advanced options (top_p, penalties, etc.)"):
             top_p = st.slider(
@@ -292,6 +360,11 @@ with col_main:
             + SYSTEM_PROMPTS[prompt_technique]
             + SYSTEM_PROMPT_REFUSAL
         )
+        # Medium #2: when JSON output is selected, instruct model to fill the structure
+        if output_format == OUTPUT_FORMAT_QUESTIONS_TIPS:
+            system_content += "\n\nOutput your answer as JSON only: an object with \"questions\" (array of {question, topic}) and \"tips\" (array of strings). No other text."
+        elif output_format == OUTPUT_FORMAT_PREP_GUIDE:
+            system_content += "\n\nOutput your answer as JSON only: an object with \"summary\" (string) and \"sections\" (array of {title, content}). No other text."
         user_message = user_input.strip()
 
         # Medium #1: build API kwargs from UI settings
@@ -308,6 +381,11 @@ with col_main:
         }
         if max_tokens_ui > 0:
             api_kwargs["max_tokens"] = max_tokens_ui
+        # Medium #2: request structured JSON when a JSON format is selected
+        if output_format == OUTPUT_FORMAT_QUESTIONS_TIPS:
+            api_kwargs["response_format"] = {"type": "json_schema", "json_schema": JSON_SCHEMA_QUESTIONS_TIPS}
+        elif output_format == OUTPUT_FORMAT_PREP_GUIDE:
+            api_kwargs["response_format"] = {"type": "json_schema", "json_schema": JSON_SCHEMA_PREP_GUIDE}
 
         with st.spinner("Generating..."):
             try:
@@ -317,7 +395,34 @@ with col_main:
                 st.session_state.request_count = st.session_state.get("request_count", 0) + 1
                 st.divider()
                 st.success("Here’s your interview prep (" + answer_length + ", " + difficulty + ", **" + interviewer_persona + "** persona, **" + model_display + "**, **" + response_style_display + "**, Creativity: **" + creativity_display + "**):")
-                st.markdown(reply)
+                if output_format == OUTPUT_FORMAT_PLAIN:
+                    st.markdown(reply)
+                else:
+                    try:
+                        data = json.loads(reply)
+                        if output_format == OUTPUT_FORMAT_QUESTIONS_TIPS:
+                            qs = data.get("questions", [])
+                            tips = data.get("tips", [])
+                            if qs:
+                                st.subheader("Questions")
+                                for i, item in enumerate(qs, 1):
+                                    q = item.get("question", "")
+                                    t = item.get("topic", "")
+                                    st.markdown(f"{i}. **{q}**" + (f" _({t})_" if t else ""))
+                            if tips:
+                                st.subheader("Tips")
+                                for t in tips:
+                                    st.markdown("- " + t)
+                            st.download_button("Download as JSON", reply, file_name="interview_questions_and_tips.json", mime="application/json", key="dl_questions_tips")
+                        elif output_format == OUTPUT_FORMAT_PREP_GUIDE:
+                            st.markdown(data.get("summary", ""))
+                            for sec in data.get("sections", []):
+                                st.subheader(sec.get("title", ""))
+                                st.markdown(sec.get("content", ""))
+                            st.download_button("Download as JSON", reply, file_name="interview_prep_guide.json", mime="application/json", key="dl_prep_guide")
+                    except (json.JSONDecodeError, TypeError):
+                        st.warning("Could not parse JSON. Showing raw response.")
+                        st.markdown(reply)
                 st.caption("You can try a different response style or temperature and run again.")
             except Exception as e:
                 st.error("Something went wrong. Try again or check your connection.")
