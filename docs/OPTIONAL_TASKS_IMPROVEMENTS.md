@@ -71,3 +71,11 @@ That covers the four biggest risks in a public LLM web app.
 **Category:** Easy
 
 **What we implemented:** We added a **Difficulty** selector (Easy, Medium, Hard, Expert) so users can adjust the complexity of interview questions. The chosen difficulty is injected into the system prompt so the model tailors question depth and expectations (e.g. Easy = foundational/junior, Medium = mid-level, Hard = senior/advanced, Expert = FAANG-level or very tough). The success message shows the selected difficulty alongside response style and temperature. One new selectbox and an extended system-prompt prefix in `app.py`; no new API parameters.
+
+---
+
+## Easy #5 — Optimize prompts for concise vs. detailed responses
+
+**Category:** Easy
+
+**What we implemented:** We added an **Answer length** selector (Concise / Detailed) so users can experiment with prompting the model to give short or in-depth answers. Concise injects an instruction to keep responses short (bullet points, 1–2 sentences per point, no long paragraphs); Detailed injects an instruction to include explanations, examples, and fuller context. The success message shows the selected answer length. Implements “experiment with prompting [the LLM] to give short or in-depth answers” via one selectbox and a conditional length instruction in the system prompt in `app.py`.

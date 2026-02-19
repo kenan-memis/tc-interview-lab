@@ -11,7 +11,7 @@ Checklist of all optional tasks (easy, medium, hard). Mark with `[x]` when imple
 - [x] **2.** Improve ChatGPT prompts for your personal domain (IT, finance, HR, communication, etc.).
 - [x] **3.** Implement more security constraints (e.g. user input validation, system prompt validation). Consider using ChatGPT to verify these aspects.
 - [x] **4.** Simulate different difficulty levels — adjust the complexity of interview questions (easy, medium, hard).
-- [ ] **5.** Optimize prompts for concise vs. detailed responses — experiment with short or in-depth answers.
+- [x] **5.** Optimize prompts for concise vs. detailed responses — experiment with short or in-depth answers.
 - [ ] **6.** Generate interviewer guidelines — ask ChatGPT to create structured evaluation criteria for technical and behavioural interviews.
 - [ ] **7.** Simulate a mock interview with AI personas — role-play as a strict, neutral, or friendly interviewer.
 

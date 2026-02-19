@@ -177,6 +177,10 @@ No UI changes; only prompt text in `app.py` was updated.
 
 We added a **Difficulty** selector (Easy, Medium, Hard, Expert) so users can adjust the complexity of interview questions. The chosen difficulty is injected into the system prompt (e.g. "The user wants **Behavioural** preparation at **Medium** difficulty. Adjust the complexity of questions and expectations accordingly…") with brief guidance: Easy = foundational/junior, Medium = mid-level, Hard = senior/advanced, Expert = FAANG-level or very tough. The success message shows the selected difficulty alongside response style and temperature. Implemented via one new selectbox and one extended system-prompt prefix in `app.py`.
 
+### 4.6 Optional easy #5: Optimize prompts for concise vs. detailed responses
+
+We added an **Answer length** selector (Concise / Detailed) so users can experiment with prompting the model to give short or in-depth answers. The choice is injected into the system prompt: **Concise** instructs the model to keep responses short (bullet points, 1–2 sentences per point, no long paragraphs); **Detailed** instructs it to include explanations, examples, and fuller context. The success message shows the selected answer length. This implements the task of “experimenting with prompting [the LLM] to give short or in-depth answers” via one new selectbox and a conditional length instruction in the system prompt in `app.py`.
+
 ---
 
-*Last updated: Phase I — Optional easy #4 (difficulty levels) applied.*
+*Last updated: Phase I — Optional easy #5 (concise vs. detailed) applied.*

@@ -115,6 +115,8 @@ PRACTICE_TYPES = {
 
 # Optional easy #4: difficulty levels — adjust complexity of interview questions
 DIFFICULTY_OPTIONS = ("Easy", "Medium", "Hard", "Expert")
+# Optional easy #5: concise vs detailed — prompt the model for short or in-depth answers
+ANSWER_LENGTH_OPTIONS = ("Concise", "Detailed")
 
 practice_type = st.selectbox(
     "What do you want to practice?",
@@ -128,6 +130,13 @@ difficulty = st.selectbox(
     options=DIFFICULTY_OPTIONS,
     index=1,
     help="Easy = foundational/junior; Medium = mid-level; Hard = senior/advanced; Expert = FAANG-level or very tough.",
+)
+
+answer_length = st.selectbox(
+    "Answer length",
+    options=ANSWER_LENGTH_OPTIONS,
+    index=0,
+    help="Concise = short bullets and 1–2 sentences per point; Detailed = fuller explanations and examples.",
 )
 
 config = PRACTICE_TYPES[practice_type]
@@ -193,10 +202,16 @@ if st.button("Generate"):
         st.error("OpenAI API key is missing. Add OPENAI_API_KEY to your .env file and restart the app.")
         st.stop()
 
-    # Embed practice type and difficulty in system prompt (Top 5 #3 + optional easy #4)
+    # Embed practice type, difficulty, and answer length in system prompt (Top 5 #3 + easy #4 + easy #5)
+    length_instruction = (
+        "The user wants **concise** answers: keep responses short, bullet points and 1–2 sentences per point. No long paragraphs."
+        if answer_length == "Concise"
+        else "The user wants **detailed** answers: include explanations, examples, and fuller context where helpful."
+    )
     system_content = (
         f"The user wants **{practice_type}** preparation at **{difficulty}** difficulty. "
-        f"Adjust the complexity of questions and expectations accordingly (Easy = foundational/junior, Medium = mid-level, Hard = senior/advanced, Expert = FAANG-level or very tough). Use this to tailor your response.\n\n"
+        f"Adjust the complexity of questions and expectations accordingly (Easy = foundational/junior, Medium = mid-level, Hard = senior/advanced, Expert = FAANG-level or very tough). "
+        f"{length_instruction} Use this to tailor your response.\n\n"
         + SYSTEM_PROMPTS[prompt_technique]
         + SYSTEM_PROMPT_REFUSAL
     )
@@ -216,7 +231,7 @@ if st.button("Generate"):
             reply = response.choices[0].message.content
             st.session_state.request_count = st.session_state.get("request_count", 0) + 1
             st.divider()
-            st.success("Here’s your interview prep (" + difficulty + ", **" + response_style_display + "**, " + temp_choice + "):")
+            st.success("Here’s your interview prep (" + answer_length + ", " + difficulty + ", **" + response_style_display + "**, " + temp_choice + "):")
             st.markdown(reply)
             st.caption("You can try a different response style or temperature and run again.")
         except Exception as e:
