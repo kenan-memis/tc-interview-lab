@@ -87,3 +87,11 @@ That covers the four biggest risks in a public LLM web app.
 **Category:** Easy
 
 **What we implemented:** We added an **Answer length** selector (Concise / Detailed) so users can experiment with prompting the model to give short or in-depth answers. Concise injects an instruction to keep responses short (bullet points, 1–2 sentences per point, no long paragraphs); Detailed injects an instruction to include explanations, examples, and fuller context. The success message shows the selected answer length. Implements “experiment with prompting [the LLM] to give short or in-depth answers” via one selectbox and a conditional length instruction in the system prompt in `app.py`.
+
+---
+
+## Easy #6 — Generate interviewer guidelines
+
+**Category:** Easy
+
+**What we implemented:** An in-app section **"For interviewers: generate evaluation guidelines"** (expander below the main prep flow). It uses the **current** Difficulty and Practice type from the page. When the user clicks **"Generate interviewer guidelines"**, the app calls the same API with a dedicated prompt that asks the model to create structured evaluation criteria for that practice type and difficulty (e.g. what to assess, how to score, strong vs weak indicators, red flags). The result is shown in the UI. Changing difficulty or practice type and clicking again produces different guidelines. Rate limiting applies (one request per click). Implements "ask ChatGPT to create structured evaluation criteria for technical and behavioural interviews" by using the in-app model with difficulty/seniority-aware prompts so results stay in sync with the parameters the user selected.

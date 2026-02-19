@@ -236,3 +236,45 @@ if st.button("Generate"):
             st.caption("You can try a different response style or temperature and run again.")
         except Exception as e:
             st.error("Something went wrong. Try again or check your connection.")
+
+# Optional easy #6: generate interviewer guidelines (uses current difficulty + practice type)
+st.divider()
+with st.expander("For interviewers: generate evaluation guidelines"):
+    st.caption("Generate structured evaluation criteria for the current practice type and difficulty. Use the selections above.")
+    st.caption("Using: **Difficulty** = " + difficulty + ", **Practice type** = " + practice_type + ".")
+    if st.button("Generate interviewer guidelines", key="guidelines_btn"):
+        if "request_count" not in st.session_state:
+            st.session_state.request_count = 0
+        if st.session_state.request_count >= MAX_REQUESTS_PER_SESSION:
+            st.error(f"Rate limit reached ({MAX_REQUESTS_PER_SESSION} requests per session). Refresh the page to start a new session.")
+        else:
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                st.error("OpenAI API key is missing. Add OPENAI_API_KEY to your .env file and restart the app.")
+            else:
+                guidelines_system = (
+                    "You are an expert on IT interview design. Create structured evaluation criteria "
+                    "that interviewers can use to assess candidates in IT roles. Be clear and practical. Use headings and bullets."
+                )
+                guidelines_user = (
+                    f"Create structured evaluation criteria for **{practice_type}** interviews at **{difficulty}** level. "
+                    f"(Easy = junior/foundational, Medium = mid-level, Hard = senior, Expert = FAANG-level.) "
+                    "Include: (1) what to assess, (2) how to score or what strong vs weak looks like, (3) concrete indicators or red flags. Use clear headings and bullets."
+                )
+                with st.spinner("Generating guidelines..."):
+                    try:
+                        client = OpenAI(api_key=api_key)
+                        response = client.chat.completions.create(
+                            model="gpt-4o-mini",
+                            messages=[
+                                {"role": "system", "content": guidelines_system},
+                                {"role": "user", "content": guidelines_user},
+                            ],
+                            temperature=0.5,
+                        )
+                        guidelines_text = response.choices[0].message.content
+                        st.session_state.request_count = st.session_state.get("request_count", 0) + 1
+                        st.success("Interviewer guidelines generated.")
+                        st.markdown(guidelines_text)
+                    except Exception:
+                        st.error("Something went wrong. Try again or check your connection.")
