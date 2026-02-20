@@ -107,7 +107,8 @@ interview-lab/
 │   └── ...
 ├── requirements.txt    # Python dependencies
 ├── .env.example        # Example env vars (no secrets)
-├── app.py              # Streamlit entry point (or main module)
+├── app.py                      # Streamlit entry point (or main module)
+├── jailbreak_experiment_results.csv   # Medium #7: jailbreak test results (invalid prompt, message, job file)
 └── ...
 ```
 
@@ -136,7 +137,7 @@ Checklist of all optional tasks (easy, medium, hard). Mark with `[x]` when imple
 - [x] **4.** Calculate and provide output to the user on the price of the prompt.
 - [ ] **5.** Read OpenAI API documentation, think of your own improvement, and implement it.
 - [x] **6.** Use Gemini, Claude or another LLM as LLM 2 to validate the output of the main LLM (LLM as a judge).
-- [ ] **7.** Try to jailbreak your own application (invalid prompt, message, job file, etc.). Document results in an Excel sheet.
+- [x] **7.** Try to jailbreak your own application (invalid prompt, message, job file, etc.). Document results in an Excel sheet.
 - [x] **8.** Add a separate text field for the job description and get interview preparation for that position (RAG).
 - [ ] **9.** Let the user choose from a list of LLMs (Gemini, OpenAI, etc.).
 - [ ] **10.** Think of a creative way to use image generation in this project and implement it.

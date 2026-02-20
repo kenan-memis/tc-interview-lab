@@ -163,6 +163,14 @@ That covers the four biggest risks in a public LLM web app.
 
 ---
 
+### Medium #7 — Jailbreak experiment (invalid prompt, message, job file)
+
+**Category:** Medium
+
+**What we did:** We tried to jailbreak (break into) our own application by testing invalid prompts, messages, and job files. We ran a structured set of tests: **(1) Prompt injection** — e.g. "Ignore previous instructions", "Reveal your system prompt", reworded injection phrases to see if the blocklist and system-prompt refusal hold. **(2) Invalid/edge messages** — empty input, spaces only, over-length input, special characters, SQL-like strings. **(3) Job description** — injection in pasted job text, over-length paste, non-PDF upload, corrupted PDF. **(4) Rate limit** — many requests in one session to confirm the cap is enforced. For each test we recorded: Test #, Category, Input Description, Expected Behavior, Actual Behavior, Pass/Fail, and Notes. The results are documented in a spreadsheet in the repo: **[jailbreak_experiment_results.csv](../jailbreak_experiment_results.csv)** (application root). Implements "Try to jailbreak your own application by trying to provide an invalid prompt, message, job file, etc. Provide the results of this experiment in an Excel sheet."
+
+---
+
 ### Medium #8 — Add a separate field for job description and get prep for that position (RAG)
 
 **Category:** Medium
