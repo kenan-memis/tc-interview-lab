@@ -137,3 +137,11 @@ That covers the four biggest risks in a public LLM web app.
 **Category:** Hard
 
 **What we implemented:** Same as Medium #3: we chose **Google Cloud (GCP)** and prepared a **Cloud Run** deployment. The **DEPLOYMENT.md** guide, **Dockerfile**, and **.dockerignore** are in the application root. **Deployment completed.** Live app: [https://interview-lab-482230990341.europe-west10.run.app/](https://interview-lab-482230990341.europe-west10.run.app/). The app is on the Internet (Medium #3) and on Google Cloud (Hard #2).
+
+---
+
+## Medium #4 — Calculate and provide output to the user on the price of the prompt
+
+**Category:** Medium
+
+**What we implemented:** We calculate and display the **estimated cost** of each OpenAI API request (prompt + completion) so the user sees the price of the prompt. **(1) Pricing table:** A dictionary `OPENAI_PRICE_PER_1M` in `app.py` stores USD per 1M tokens (input, output) for all five supported models: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, gpt-4o, gpt-4o-mini. Values are approximate and based on [OpenAI pricing](https://openai.com/api/pricing); they can be updated when OpenAI changes prices. **(2) Helper:** `format_request_cost(model_id, prompt_tokens, completion_tokens)` returns a display string with estimated cost (e.g. "Estimated cost: **$0.0008** (320 prompt, 180 completion tokens). Prices approximate; see OpenAI pricing.") or, for unknown models, token counts only. **(3) Usage from API:** After each `client.chat.completions.create()` we read `response.usage.prompt_tokens` and `response.usage.completion_tokens` (with safe fallbacks if `usage` is missing). **(4) Display:** The cost string is shown as a caption below the main "Generate" response and below the "Generate interviewer guidelines" response, so the user sees the price of each request. Implements "Calculate and provide output to the user on the price of the prompt" via a small in-app pricing table, usage extraction from the API response, and formatted cost output in the UI.

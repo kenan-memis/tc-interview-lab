@@ -122,6 +122,31 @@ OPENAI_MODELS = [
 ]
 OPENAI_MODEL_DISPLAY_TO_ID = {display: id_ for display, id_ in OPENAI_MODELS}
 
+# Medium #4: cost estimation — $ per 1M tokens (input, output); source: OpenAI pricing (approximate)
+OPENAI_PRICE_PER_1M = {
+    "gpt-4.1": (3.00, 12.00),
+    "gpt-4.1-mini": (0.80, 3.20),
+    "gpt-4.1-nano": (0.10, 0.40),
+    "gpt-4o": (2.50, 10.00),
+    "gpt-4o-mini": (0.15, 0.60),
+}
+
+
+def format_request_cost(model_id, prompt_tokens, completion_tokens):
+    """Return (cost_usd, display_string) for a request; or (None, None) if unknown model or no usage."""
+    if not (prompt_tokens >= 0 and completion_tokens >= 0):
+        return None, None
+    prices = OPENAI_PRICE_PER_1M.get(model_id)
+    if not prices:
+        return None, f"Token usage: {prompt_tokens} prompt, {completion_tokens} completion (cost not estimated for this model)."
+    input_per_1m, output_per_1m = prices
+    cost_usd = (prompt_tokens * input_per_1m + completion_tokens * output_per_1m) / 1_000_000
+    return round(cost_usd, 6), (
+        f"Estimated cost: **${cost_usd:.6f}** ({prompt_tokens} prompt, {completion_tokens} completion tokens). "
+        "Prices approximate; see [OpenAI pricing](https://openai.com/api/pricing)."
+    )
+
+
 # Creativity level: stepped control for temperature (feedback: reduce slider fatigue)
 CREATIVITY_OPTIONS = [
     ("Precise", 0.2),
@@ -393,6 +418,11 @@ with col_main:
                 response = client.chat.completions.create(**api_kwargs)
                 reply = response.choices[0].message.content
                 st.session_state.request_count = st.session_state.get("request_count", 0) + 1
+                # Medium #4: cost from usage
+                usage = getattr(response, "usage", None)
+                prompt_tokens = getattr(usage, "prompt_tokens", 0) or 0 if usage else 0
+                completion_tokens = getattr(usage, "completion_tokens", 0) or 0 if usage else 0
+                _, cost_str = format_request_cost(model_id, prompt_tokens, completion_tokens)
                 st.divider()
                 st.success("Here’s your interview prep (" + answer_length + ", " + difficulty + ", **" + interviewer_persona + "** persona, **" + model_display + "**, **" + response_style_display + "**, Creativity: **" + creativity_display + "**):")
                 if output_format == OUTPUT_FORMAT_PLAIN:
@@ -423,6 +453,8 @@ with col_main:
                     except (json.JSONDecodeError, TypeError):
                         st.warning("Could not parse JSON. Showing raw response.")
                         st.markdown(reply)
+                if cost_str:
+                    st.caption(cost_str)
                 st.caption("You can try a different response style or temperature and run again.")
             except Exception as e:
                 st.error("Something went wrong. Try again or check your connection.")
@@ -477,7 +509,14 @@ with col_guidelines:
                             response = client.chat.completions.create(**guidelines_kwargs)
                             guidelines_text = response.choices[0].message.content
                             st.session_state.request_count = st.session_state.get("request_count", 0) + 1
+                            # Medium #4: show estimated cost for guidelines request
+                            usage = getattr(response, "usage", None)
+                            pt = getattr(usage, "prompt_tokens", 0) or 0 if usage else 0
+                            ct = getattr(usage, "completion_tokens", 0) or 0 if usage else 0
+                            _, guidelines_cost_str = format_request_cost(model_id, pt, ct)
                             st.success("Interviewer guidelines generated.")
                             st.markdown(guidelines_text)
+                            if guidelines_cost_str:
+                                st.caption(guidelines_cost_str)
                         except Exception:
                             st.error("Something went wrong. Try again or check your connection.")
