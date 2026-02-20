@@ -3,13 +3,32 @@ Interview Lab — Streamlit app (Phase G: UI polish).
 Single page: practice type, request, advanced options, Generate, response.
 """
 
+import io
 import json
 import os
 import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
+from pypdf import PdfReader
 
 load_dotenv()
+
+# Medium #8: max length for job description (paste or extracted from PDF)
+MAX_JOB_DESCRIPTION_LENGTH = 6000
+
+
+def extract_text_from_pdf(uploaded_file):
+    """Extract text from an uploaded PDF. Returns text or None on failure."""
+    try:
+        reader = PdfReader(io.BytesIO(uploaded_file.read()))
+        parts = []
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                parts.append(text)
+        return "\n".join(parts).strip() if parts else None
+    except Exception:
+        return None
 
 # Security guard (Phase F): input length limit
 MAX_INPUT_LENGTH = 3000
@@ -271,6 +290,35 @@ with col_main:
         help="Describe what you want to practice; the coach will tailor the response.",
     )
 
+    # Medium #8: job description (optional) — paste or upload PDF; RAG-style context for the position
+    with st.expander("Job description (optional)"):
+        st.caption("Provide the job description for the position you're applying for so prep can be tailored to it.")
+        job_desc_method = st.radio(
+            "Provide job description by",
+            ["Paste text", "Upload PDF"],
+            index=0,
+            horizontal=True,
+            key="job_desc_method",
+        )
+        if job_desc_method == "Paste text":
+            job_desc_pasted = st.text_area(
+                "Paste job description below",
+                height=150,
+                max_chars=MAX_JOB_DESCRIPTION_LENGTH,
+                placeholder="Paste the full or partial job description here.",
+                key="job_desc_paste",
+                help="Max " + str(MAX_JOB_DESCRIPTION_LENGTH) + " characters.",
+            )
+            job_desc_pdf_file = None
+        else:
+            job_desc_pdf_file = st.file_uploader(
+                "Upload a PDF",
+                type=["pdf"],
+                key="job_desc_pdf",
+                help="We extract text from the PDF. If extraction fails, use the paste option instead.",
+            )
+            job_desc_pasted = ""
+
     with st.expander("Advanced options (response style & API settings)"):
         # Primary controls: model, response style, creativity (feedback: stepped control, less slider fatigue)
         model_display = st.selectbox(
@@ -347,6 +395,17 @@ with col_main:
             st.warning("Please enter what you'd like to practice.")
             st.stop()
 
+        # Medium #8: resolve job description from paste or PDF (one source only)
+        job_description_content = ""
+        if job_desc_method == "Paste text" and job_desc_pasted and job_desc_pasted.strip():
+            job_description_content = job_desc_pasted.strip()[:MAX_JOB_DESCRIPTION_LENGTH]
+        elif job_desc_method == "Upload PDF" and job_desc_pdf_file is not None:
+            extracted = extract_text_from_pdf(job_desc_pdf_file)
+            if extracted is None or not extracted.strip():
+                st.error("Could not extract text from this PDF (e.g. scanned or protected). Please use the paste option and paste the job description instead.")
+                st.stop()
+            job_description_content = extracted.strip()[:MAX_JOB_DESCRIPTION_LENGTH]
+
         # Rate limiting (Top 5 improvement #5)
         if "request_count" not in st.session_state:
             st.session_state.request_count = 0
@@ -385,6 +444,14 @@ with col_main:
             + SYSTEM_PROMPTS[prompt_technique]
             + SYSTEM_PROMPT_REFUSAL
         )
+        # Medium #8: inject job description as RAG-style context when provided
+        if job_description_content:
+            system_content = (
+                "The user has provided the following **job description** for the position they are applying for. "
+                "Use it to tailor the interview preparation (questions, tips, and focus areas) to this role.\n\n"
+                "---\nJob description:\n" + job_description_content + "\n---\n\n"
+                + system_content
+            )
         # Medium #2: when JSON output is selected, instruct model to fill the structure
         if output_format == OUTPUT_FORMAT_QUESTIONS_TIPS:
             system_content += "\n\nOutput your answer as JSON only: an object with \"questions\" (array of {question, topic}) and \"tips\" (array of strings). No other text."
