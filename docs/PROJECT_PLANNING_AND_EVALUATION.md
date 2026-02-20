@@ -160,7 +160,3 @@ Use this to justify choices and show awareness of limitations in your presentati
 - **Code:** Extract system prompts to a separate module or config file for easier editing and testing; add unit tests for validation (e.g. input length, API key presence); add type hints and docstrings; consider logging (e.g. request/response length, errors) for debugging.
 - **Prompts:** Add or tune few-shot examples per practice type (behavioural vs technical); experiment with stricter structured-output formats (e.g. JSON) for one of the techniques; add a “concise vs detailed” instruction that the user can toggle.
 - **Product:** Add chat history (multi-turn) so the user can follow up on the same topic; add a dedicated job-description field and prep tailored to it; deploy to Streamlit Community Cloud (or similar) and add cost estimation per request; add difficulty levels (easy/medium/hard) for questions.
-
----
-
-*Optional task implementation details (Easy #2–#6, etc.) are in `OPTIONAL_TASKS_IMPROVEMENTS.md`.*
