@@ -186,3 +186,11 @@ That covers the four biggest risks in a public LLM web app.
 **Category:** Hard
 
 **What we implemented:** Same as Medium #3: we chose **Google Cloud (GCP)** and prepared a **Cloud Run** deployment. The **DEPLOYMENT.md** guide, **Dockerfile**, and **.dockerignore** are in the application root. **Deployment completed.** Live app: [https://interview-lab-482230990341.europe-west10.run.app/](https://interview-lab-482230990341.europe-west10.run.app/). The app is on the Internet (Medium #3) and on Google Cloud (Hard #2).
+
+---
+
+### Hard #6 — Assess the performance of your prompt and/or model (LLM-as-judge)
+
+**Category:** Hard
+
+**What we implemented:** We assess the **performance of the prompt and model** using the same LLM-as-judge flow as Medium #6. The right-column section is titled **"Performance assessment (LLM-as-judge)"**: after the user generates prep, they click **Validate with Gemini**. Gemini (LLM 2) receives the user request and the prep output and is asked explicitly to *assess the performance of the prompt and model* that produced it—evaluating relevance, quality/clarity, completeness, and professionalism, and returning an overall score (1–5), strengths, weaknesses, and suggestions to improve the prompt or output. The judge prompt was tightened so the assessment is framed as prompt/model performance, not only “validation.” The result is shown in the same area. No new dependencies or APIs; this reuses the existing Gemini integration and satisfies “Assess the performance of your prompt and/or model, via LLM-as-a-judge or other methods.”

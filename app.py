@@ -37,7 +37,7 @@ def run_gemini_judge(user_request: str, prep_output: str, practice_type: str, di
 {prep_output[:8000]}
 ---
 
-Assess it for: (1) relevance to the user's request, (2) quality and clarity of questions/tips, (3) completeness, (4) professionalism. Give a concise assessment: overall quality (1–5), key strengths, any weaknesses, and 1–2 concrete suggestions for improvement. Be direct and practical. Use clear headings or bullets."""
+Assess the **performance of the prompt and model** that produced this output. Evaluate: (1) relevance to the user's request, (2) quality and clarity of questions/tips, (3) completeness, (4) professionalism. Give a concise performance assessment: overall score (1–5), key strengths, any weaknesses, and 1–2 concrete suggestions to improve the prompt or output. Be direct and practical. Use clear headings or bullets."""
     try:
         client = genai.Client(api_key=api_key.strip())
         last_error = "Gemini returned no text. Check your API key and quota."
@@ -640,10 +640,10 @@ with col_guidelines:
                         except Exception:
                             st.error("Something went wrong. Try again or check your connection.")
 
-    # Medium #6: LLM-as-judge — show Gemini validation in this column
+    # Medium #6 & Hard #6: LLM-as-judge — validate prep and assess prompt/model performance
     st.markdown("<div style='min-height: 24px;'></div>", unsafe_allow_html=True)
-    st.subheader("Validation (Gemini)")
-    st.caption("LLM 2 validates the last interview prep from the main AI. Generate prep first, then click below.")
+    st.subheader("Performance assessment (LLM-as-judge)")
+    st.caption("Gemini assesses the last prep and the performance of your prompt & model. Generate prep first, then click below.")
     last_reply = st.session_state.get("last_prep_reply")
     if last_reply:
         if st.button("Validate with Gemini", key="validate_gemini_btn"):

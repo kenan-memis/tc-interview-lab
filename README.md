@@ -149,9 +149,7 @@ Checklist of all optional tasks (easy, medium, hard). Mark with `[x]` when imple
 - [ ] **3.** Use LangChain (chains or agents) to implement the app.
 - [ ] **4.** Add a vector database to check if interview preparation data was seen before; prompt LLM to generate new content when needed.
 - [ ] **5.** Use open-source LLMs (not Gemini, OpenAI, etc.) for the project.
-- [ ] **6.** Assess the performance of your prompt and/or model (e.g. LLM-as-a-judge or other methods).
-
-*When you implement a task, change `- [ ]` to `- [x]` for that line. Update the "Optional tasks we implemented" section in evaluation_criteria.md (sprint_1) for your presentation.*
+- ✅ **6.** Assess the performance of your prompt and/or model (e.g. LLM-as-a-judge or other methods).
 
 ---
 
