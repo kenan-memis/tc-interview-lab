@@ -11,7 +11,53 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from pypdf import PdfReader
 
+# Medium #6: Gemini as LLM 2 (judge) — optional (uses google-genai, not deprecated google.generativeai)
+try:
+    from google import genai
+except ImportError:
+    genai = None
+
+
+def run_gemini_judge(user_request: str, prep_output: str, practice_type: str, difficulty: str) -> tuple[str | None, str | None]:
+    """Ask Gemini to evaluate the interview prep. Returns (judge_text, error_message)."""
+    if genai is None:
+        return None, "Missing package: pip install google-genai"
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key or not api_key.strip():
+        return None, "GEMINI_API_KEY is not set in your environment or .env file."
+    prompt = f"""You are an expert interviewer and hiring manager. Evaluate the following interview preparation output.
+
+**Context:** The user asked for **{practice_type}** prep at **{difficulty}** difficulty. Their request was:
+---
+{user_request[:2000]}
+---
+
+**The main AI (LLM 1) produced this preparation:**
+---
+{prep_output[:8000]}
+---
+
+Assess it for: (1) relevance to the user's request, (2) quality and clarity of questions/tips, (3) completeness, (4) professionalism. Give a concise assessment: overall quality (1–5), key strengths, any weaknesses, and 1–2 concrete suggestions for improvement. Be direct and practical. Use clear headings or bullets."""
+    try:
+        client = genai.Client(api_key=api_key.strip())
+        last_error = "Gemini returned no text. Check your API key and quota."
+        # Use current models: 2.5-flash is GA; 1.5-flash fallback (2.0-flash is no longer available to new users)
+        for model_id in ("gemini-2.5-flash", "gemini-1.5-flash"):
+            try:
+                response = client.models.generate_content(model=model_id, contents=prompt)
+                text = getattr(response, "text", None) if response else None
+                if text and text.strip():
+                    return text.strip(), None
+            except Exception as e:
+                last_error = str(e).strip() or repr(e)
+        return None, last_error
+    except Exception as e:
+        return None, (str(e).strip() or repr(e))
+
+# Load .env from app directory so GEMINI_API_KEY etc. are set even if run from parent folder
 load_dotenv()
+_app_dir = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_app_dir, ".env"))
 
 # Medium #8: max length for job description (paste or extracted from PDF)
 MAX_JOB_DESCRIPTION_LENGTH = 6000
@@ -485,6 +531,12 @@ with col_main:
                 response = client.chat.completions.create(**api_kwargs)
                 reply = response.choices[0].message.content
                 st.session_state.request_count = st.session_state.get("request_count", 0) + 1
+                # Medium #6: store last prep for Gemini validation (LLM-as-judge)
+                st.session_state["last_prep_reply"] = reply
+                st.session_state["last_prep_user_request"] = user_message
+                st.session_state["last_prep_practice_type"] = practice_type
+                st.session_state["last_prep_difficulty"] = difficulty
+                st.session_state.pop("gemini_validation", None)  # clear so user can re-validate new prep
                 # Medium #4: cost from usage
                 usage = getattr(response, "usage", None)
                 prompt_tokens = getattr(usage, "prompt_tokens", 0) or 0 if usage else 0
@@ -587,3 +639,34 @@ with col_guidelines:
                                 st.caption(guidelines_cost_str)
                         except Exception:
                             st.error("Something went wrong. Try again or check your connection.")
+
+    # Medium #6: LLM-as-judge — show Gemini validation in this column
+    st.markdown("<div style='min-height: 24px;'></div>", unsafe_allow_html=True)
+    st.subheader("Validation (Gemini)")
+    st.caption("LLM 2 validates the last interview prep from the main AI. Generate prep first, then click below.")
+    last_reply = st.session_state.get("last_prep_reply")
+    if last_reply:
+        if st.button("Validate with Gemini", key="validate_gemini_btn"):
+            gemini_key = os.getenv("GEMINI_API_KEY")
+            if not gemini_key or not gemini_key.strip():
+                st.error("GEMINI_API_KEY is missing. Add it to your .env to use validation.")
+            elif genai is None:
+                st.error("Install google-genai to use Gemini validation: pip install google-genai")
+            else:
+                with st.spinner("Gemini is evaluating the prep..."):
+                    judge_text, err_msg = run_gemini_judge(
+                        st.session_state.get("last_prep_user_request", ""),
+                        last_reply,
+                        st.session_state.get("last_prep_practice_type", ""),
+                        st.session_state.get("last_prep_difficulty", ""),
+                    )
+                if judge_text:
+                    st.session_state["gemini_validation"] = judge_text
+                else:
+                    st.error("Validation failed. " + (err_msg or "Check your GEMINI_API_KEY and try again."))
+    else:
+        st.info("Generate interview prep first, then click **Validate with Gemini** to have Gemini evaluate it.")
+
+    if st.session_state.get("gemini_validation"):
+        st.markdown("---")
+        st.markdown(st.session_state["gemini_validation"])

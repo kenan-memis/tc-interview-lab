@@ -23,7 +23,7 @@ This guide covers deploying the Interview Lab Streamlit app to **Google Cloud Ru
 |------|--------|
 | **Target** | Google Cloud Run (serverless containers) |
 | **App** | Streamlit app (`app.py`), single container |
-| **Secrets** | `OPENAI_API_KEY` (required at runtime) |
+| **Secrets** | `OPENAI_API_KEY` (required), `GEMINI_API_KEY` (optional, for LLM-as-judge validation) |
 | **Result** | A public HTTPS URL (e.g. `https://interview-lab-xxxxx.run.app`) |
 | **Live app** | [https://interview-lab-482230990341.europe-west10.run.app/](https://interview-lab-482230990341.europe-west10.run.app/) |
 | **Region** | This guide uses **europe-west10**. Use the same region for Artifact Registry and Cloud Run. |
@@ -164,7 +164,17 @@ gcloud secrets add-iam-policy-binding openai-api-key \
 
 To find your project number: `gcloud projects describe YOUR_PROJECT_ID --format='value(projectNumber)'`.
 
-Then deploy, referencing the secret (replace `YOUR_PROJECT_ID` with your GCP project ID):
+**Optional — Gemini (LLM-as-judge validation):** If you use the Validation (Gemini) feature, create a secret for your Gemini API key and grant access:
+
+```bash
+echo -n "YOUR_GEMINI_API_KEY" | gcloud secrets create GEMINI_API_KEY --data-file=- --project=YOUR_PROJECT_ID
+gcloud secrets add-iam-policy-binding GEMINI_API_KEY \
+  --member="serviceAccount:YOUR_PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor" \
+  --project=YOUR_PROJECT_ID
+```
+
+Then deploy, referencing the secret(s). Use one `--set-secrets` with comma-separated entries (replace `YOUR_PROJECT_ID` with your GCP project ID):
 
 ```bash
 gcloud run deploy interview-lab \
@@ -172,7 +182,14 @@ gcloud run deploy interview-lab \
   --region europe-west10 \
   --platform managed \
   --allow-unauthenticated \
-  --set-secrets="OPENAI_API_KEY=openai-api-key:latest"
+  --set-secrets="OPENAI_API_KEY=OPENAI_API_KEY:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest" \
+  --project=YOUR_PROJECT_ID
+```
+
+If you do not use Gemini validation, omit `GEMINI_API_KEY` from the command:
+
+```bash
+  --set-secrets="OPENAI_API_KEY=OPENAI_API_KEY:latest"
 ```
 
 **5b. Or set the API key as an environment variable (simpler, less secure)**

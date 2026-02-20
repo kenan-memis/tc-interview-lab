@@ -24,7 +24,7 @@ Checklist of all optional tasks (easy, medium, hard). Mark with `[x]` when imple
 - [x] **3.** Deploy your app to the Internet.
 - [x] **4.** Calculate and provide output to the user on the price of the prompt.
 - [ ] **5.** Read OpenAI API documentation, think of your own improvement, and implement it.
-- [ ] **6.** Use Gemini, Claude or another LLM as LLM 2 to validate the output of the main LLM (LLM as a judge).
+- [x] **6.** Use Gemini, Claude or another LLM as LLM 2 to validate the output of the main LLM (LLM as a judge).
 - [ ] **7.** Try to jailbreak your own application (invalid prompt, message, job file, etc.). Document results in an Excel sheet.
 - [x] **8.** Add a separate text field for the job description and get interview preparation for that position (RAG).
 - [ ] **9.** Let the user choose from a list of LLMs (Gemini, OpenAI, etc.).

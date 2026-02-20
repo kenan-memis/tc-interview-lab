@@ -148,6 +148,14 @@ That covers the four biggest risks in a public LLM web app.
 
 ---
 
+## Medium #6 — Use Gemini as LLM 2 to validate the output of the main LLM (LLM as a judge)
+
+**Category:** Medium
+
+**What we implemented:** We use **Gemini** as a second LLM (LLM 2) to evaluate the interview preparation produced by the main AI (LLM 1, OpenAI). **(1) Flow:** After the user generates prep with "Generate", the app stores the last reply and user request in session state. In the right column under "For interviewers", a **Validation (Gemini)** section shows a button **Validate with Gemini**. When the user clicks it, we send the last prep output and the user’s request (plus practice type and difficulty) to Gemini with a judge prompt. **(2) Judge prompt:** Gemini is asked to assess relevance, quality and clarity, completeness, and professionalism, and to give an overall quality score (1–5), strengths, weaknesses, and 1–2 concrete suggestions. **(3) Display:** The Gemini response is shown in the same right column (where "SHOW VALIDATION HERE" was in the design), below the button; no download feature. **(4) Setup:** Optional dependency `google-genai`; optional env var `GEMINI_API_KEY`. If the key is missing or the package is not installed, the app shows a clear error when the user tries to validate. Implements "Use Gemini, Claude or a different LLM to act as LLM 2 that would validate the output of the main LLM 1 (LLM as a judge)" via in-app Gemini integration and a dedicated validation area in the UI.
+
+---
+
 ## Medium #8 — Add a separate field for job description and get prep for that position (RAG)
 
 **Category:** Medium
